@@ -1,4 +1,4 @@
-file "$(AREA_DETECTOR)/ADApp/Db/firewireFeature.db" 
+file "$(AREA_DETECTOR)/ADApp/Db/firewireFeature.template" 
 { 
 pattern
 {     P,     R,   PORT,     FEATURE,     N,  DESC}
@@ -27,7 +27,7 @@ pattern
 {13FW1:, cam1:,    FW1,     QUALITY,    21,  "Capture quality"}
 }
 
-file "$(AREA_DETECTOR)/ADApp/Db/firewireVideoModes.db" 
+file "$(AREA_DETECTOR)/ADApp/Db/firewireVideoModes.template" 
 { 
 pattern
 {     P,     R,   PORT,    N}
