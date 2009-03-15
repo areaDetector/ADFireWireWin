@@ -1133,10 +1133,10 @@ asynStatus FirewireWinDCAM::formatValidModes()
     for (format=0; format<=MAX_1394_VIDEO_FORMATS; format++) {
         if (this->pCamera->HasVideoFormat(format)) {
             sprintf(str, "%d %s", format, videoFormatStrings[format]);
-            setIntegerParam(format, FCD_has_format, 1);
+            setIntegerParam(format, FDC_has_format, 1);
         } else {
             sprintf(str, "%d N.A.", format);
-            setIntegerParam(format, FCD_has_format, 0);
+            setIntegerParam(format, FDC_has_format, 0);
         }
         setStringParam(format, FDC_valid_format, str);
     }
@@ -1151,10 +1151,10 @@ asynStatus FirewireWinDCAM::formatValidModes()
     for (mode=0; mode<=MAX_1394_VIDEO_MODES; mode++) {
         if (this->pCamera->HasVideoMode(format, mode)) {
             sprintf(str, "%d %s", mode, videoModeStrings[format][mode]);
-            setIntegerParam(mode, FCD_has_mode, 1);
+            setIntegerParam(mode, FDC_has_mode, 1);
         } else {
             sprintf(str, "%d N.A.", mode);
-            setIntegerParam(mode, FCD_has_mode, 0);
+            setIntegerParam(mode, FDC_has_mode, 0);
         }
         setStringParam(mode, FDC_valid_mode, str);
     }
@@ -1169,10 +1169,10 @@ asynStatus FirewireWinDCAM::formatValidModes()
     for (rate=0; rate<=MAX_1394_FRAME_RATES; rate++) {
         if (this->pCamera->HasVideoFrameRate(format, mode, rate)) {
             sprintf(str, "%d %s", rate, frameRateStrings[rate]);
-            setIntegerParam(rate, FCD_has_framerate, 1);
+            setIntegerParam(rate, FDC_has_framerate, 1);
         } else {
             sprintf(str, "%d N.A.", rate);
-            setIntegerParam(rate, FCD_has_framerate, 0);
+            setIntegerParam(rate, FDC_has_framerate, 0);
         }
         setStringParam(rate, FDC_valid_framerate, str);
     }
