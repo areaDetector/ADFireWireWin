@@ -648,6 +648,9 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
     pasynManager->getAddr(pasynUser, &addr);
     if (addr < 0) addr=0;
 
+    /* Set the value in the parameter library.  This may change later but that's OK */
+    status = setIntegerParam(addr, function, value);
+
     rbValue = value;
 
     switch(function)
@@ -708,7 +711,6 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
 
     }
 
-    if (status != asynError) status = setIntegerParam(addr, function, rbValue);
     /* Call the callback for the specific address .. and address ... weird? */
     if (status != asynError) callParamCallbacks(addr, addr);
     return status;
@@ -729,6 +731,9 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
     pasynManager->getAddr(pasynUser, &addr);
     if (addr < 0) addr=0;
 
+    /* Set the value in the parameter library.  This may change later but that's OK */
+    status = setDoubleParam(addr, function, value);
+
     switch(function)
     {
     case FDC_feat_val_abs:
@@ -745,7 +750,6 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
         break;
     }
 
-    if (status != asynError) status = setDoubleParam(addr, function, rbValue);
     if (status != asynError) callParamCallbacks(addr, addr);
     return status;
 }
@@ -1017,6 +1021,9 @@ asynStatus FirewireWinDCAM::setVideoMode( asynUser *pasynUser, epicsInt32 mode)
     if (status == asynError) goto done;
 
     done:
+    /* If the new format is format 7 then set the parameters */
+    if (format == 7) this->setFormat7Params(pasynUser);
+
     /* When the mode changes the supported values of frame rate change */
     this->formatValidModes();
     /* When the mode changes the available features can also change */
@@ -1076,6 +1083,9 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     int format;
     int sizeX, sizeY, minX, minY;
     unsigned short width, height, left, top;
+    unsigned short hsMax, vsMax, hsUnit, vsUnit;
+    unsigned short hpMax, vpMax, hpUnit, vpUnit;
+    unsigned short bppMin, bppMax, bppCur, bppRec, bppAct;
 	const char* functionName = "setFormat7Params";
 
 	getIntegerParam(ADAcquire, &wasAcquiring);
@@ -1094,6 +1104,45 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     getIntegerParam(ADSizeY, &sizeY);
     getIntegerParam(ADMinX, &minX);
     getIntegerParam(ADMinY, &minY);
+
+    /* Get the size limits */
+	this->pCameraControlSize->GetSizeLimits(&hsMax, &vsMax);
+    /* Get the size units (minimum increment) */
+	this->pCameraControlSize->GetSizeUnits(&hsUnit, &vsUnit);
+    /* Get the position limits */
+	this->pCameraControlSize->GetPosLimits(&hpMax, &vpMax);
+    /* Get the position units (minimum increment) */
+	this->pCameraControlSize->GetPosUnits(&hpUnit, &vpUnit);
+ 
+ printf("%s:%s hsMax=%d, vsMax=%d, hsUnit=%d, vsUnit=%d, hpMax=%d, vpMax=%d, hpUnit=%d, vpUnit=%d\n", 
+ driverName, functionName, hsMax, vsMax, hsUnit, vsUnit,  hpMax, vpMax, hpUnit, vpUnit);
+    /* The position limits are defined as the difference from the max size values */
+    hpMax = hsMax - hpMax;
+    vpMax = vsMax - vpMax;
+ printf("%s:%s hsMax=%d, vsMax=%d, hsUnit=%d, vsUnit=%d, hpMax=%d, vpMax=%d, hpUnit=%d, vpUnit=%d\n", 
+ driverName, functionName, hsMax, vsMax, hsUnit, vsUnit,  hpMax, vpMax, hpUnit, vpUnit);
+
+printf("%s:%s minX=%d, minY=%d, sizeX=%d, sizeY=%d\n", 
+driverName, functionName, minX, minY, sizeX, sizeY);
+
+    /* Force the requested values to obey the increment and range */
+    if (sizeX % hsUnit) sizeX = (sizeX/hsUnit) * hsUnit;
+    if (sizeY % vsUnit) sizeY = (sizeY/vsUnit) * vsUnit;
+    if (minX % hpUnit)  minX  = (minX/hpUnit)  * hpUnit;
+    if (minY % vpUnit)  minY  = (minY/vpUnit)  * vpUnit;
+    
+    if (sizeX < hsUnit) sizeX = hsUnit;
+    if (sizeX > hsMax)  sizeX = hsMax;
+    if (sizeY < vsUnit) sizeY = vsUnit;
+    if (sizeY > vsMax)  sizeY = vsMax;
+    
+    if (minX < 0) minX = 0;
+    if (minX > hpMax)  minX = hpMax;
+    if (minY < 0) minY = 0;
+    if (minY > vpMax)  minY = vpMax;
+printf("%s:%s minX=%d, minY=%d, sizeX=%d, sizeY=%d\n", 
+driverName, functionName, minX, minY, sizeX, sizeY);
+ 
 	/* attempt to write the parameters to camera */
 	asynPrint( 	pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting format 7 parameters sizeX=%d, sizeY=%d, minX=%d, minY=%d\n",
 				driverName, functionName, this->portName, sizeX, sizeY, minX, minY);
@@ -1101,6 +1150,16 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
   	status = PERR( pasynUser, err );
     if (status == asynError) goto done;
 	err = this->pCameraControlSize->SetSize(sizeX, sizeY);
+  	status = PERR( pasynUser, err );
+    if (status == asynError) goto done;
+    this->pCameraControlSize->GetBytesPerPacketRange(&bppMin, &bppMax);
+    this->pCameraControlSize->GetBytesPerPacket(&bppCur, &bppRec);
+printf("%s:%s bytes per packet: min=%d, max=%d, current=%d, recommended=%d\n", 
+driverName, functionName, bppMin, bppMax, bppCur, bppRec);
+printf("%s:%s setting bytes per packet=%d\n", 
+driverName, functionName, bppRec);
+
+    err = this->pCameraControlSize->SetBytesPerPacket(bppRec);
   	status = PERR( pasynUser, err );
     if (status == asynError) goto done;
 
@@ -1282,18 +1341,8 @@ asynStatus FirewireWinDCAM::startCapture(asynUser *pasynUser)
 {
     asynStatus status = asynSuccess;
     int err;
-    int acquiring;
     double timeout;
     const char* functionName = "startCapture";
-
-    /* return error if already acquiring */
-    getIntegerParam(ADAcquire, &acquiring);
-    if (acquiring)
-    {
-        asynPrint( pasynUser, ASYN_TRACE_ERROR, "%s::%s [%s] Camera already acquiring.\n",
-                    driverName, functionName, this->portName);
-        return asynError;
-    }
 
     getDoubleParam(ADAcquireTime, &timeout);
     if (timeout < 1.0) timeout = 1.0;
@@ -1327,20 +1376,8 @@ asynStatus FirewireWinDCAM::stopCapture(asynUser *pasynUser)
     int acquiring;
     const char * functionName = "stopCapture";
 
-    /* return error if already stopped */
-    getIntegerParam(ADAcquire, &acquiring);
-    if (!acquiring)
-    {
-        asynPrint( pasynUser, ASYN_TRACE_ERROR, "%s::%s [%s] Camera already stopped.\n",
-                    driverName, functionName, this->portName);
-        return asynError;
-    }
-
-    setIntegerParam(ADAcquire, 0);        /* set acquiring state to stopped */
-    callParamCallbacks();                 /* update whoever is interested in the acquire-state */
-
     /* Now wait for the capture thread to actually stop */
-    asynPrint( pasynUser, ASYN_TRACE_ERROR, "%s::%s [%s] waiting for stopped event...\n",
+    asynPrint( pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] waiting for stopped event...\n",
                     driverName, functionName, this->portName);
     /* unlock the mutex while we're waiting for the capture thread to stop acquiring */
     epicsMutexUnlock(this->mutexId);
