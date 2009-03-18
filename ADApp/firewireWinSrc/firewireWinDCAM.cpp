@@ -41,6 +41,7 @@
 #include <epicsThread.h>
 #include <epicsEvent.h>
 #include <epicsMutex.h>
+#include <epicsEndian.h>
 
 /* Dependency support modules includes:
  * asyn, areaDetector, dc1394 and raw1394 */
@@ -303,13 +304,18 @@ FirewireWinDCAM::FirewireWinDCAM(    const char *portName, const char* camid,
     int i, status, ret;
     char chMode = 'A';
 
-    /* parse the string of hex-numbers that is the cameras unique ID */
-    ret = sscanf(camid, "%lld", &camUID);
-
+    /* parse the string of hex-numbers that is the cameras unique ID
+     * If this string is not specified then we just use the first camera found */
+    if (camid && (strlen(camid) > 0)) {
+        ret = sscanf(camid, "%lld", &camUID);
+    } else {
+        selectedCamera = 0;
+    }
     this->pCamera = new C1394Camera();
     numCameras = this->pCamera->RefreshCameraList();
     // Print out information about all the cameras found
     printf("%s::%s: %d cameras found\n", driverName, functionName, numCameras);
+    if (numCameras < 1) return;
     for (i=0; i<numCameras; i++) {
         printf("  camera %d\n", i);
         err = this->pCamera->SelectCamera(i);
@@ -537,14 +543,19 @@ int FirewireWinDCAM::grabImage()
     NDDataType_t dataType;
     int dims[3];
     int err;
-    unsigned long sizeX, sizeY;
+    unsigned long lsizeX, lsizeY;
+    unsigned short sizeX, sizeY;
     unsigned long dataLength;
+    unsigned short depth;
+    int format, mode;
     int bytesPerColor;
     int numColors;
     int ndims;
     int droppedFrames;
     NDColorMode_t colorMode;
+    COLOR_CODE colorCode;
     unsigned char * pTmpData;
+    int unsupportedFormat = 0;
     const char* functionName = "grabImage";
 
     /* unlock the mutex while we wait for a new image to be ready */
@@ -554,41 +565,130 @@ int FirewireWinDCAM::grabImage()
     epicsMutexLock(this->mutexId);
     if (status) return status;   /* if we didn't get an image properly... */
 
+    /* Get the current video format */
+    format = this->pCamera->GetVideoFormat();
+
     /* Get the size of the frame */
-    //this->pCameraControlSize->GetSize(&sizeX, &sizeY);
-    this->pCamera->GetVideoFrameDimensions(&sizeX, &sizeY);
+    if (format == 7) {
+        this->pCameraControlSize->GetSize(&sizeX, &sizeY);
+        this->pCameraControlSize->GetDataDepth(&depth);
+        this->pCameraControlSize->GetColorCode(&colorCode);
+        switch (colorCode) {
+            case COLOR_CODE_Y8:
+            case COLOR_CODE_RAW8:
+                numColors = 1;
+                bytesPerColor = 1;
+                dataType = NDUInt8;
+                break;
+            case COLOR_CODE_Y16:
+            case COLOR_CODE_RAW16:
+                numColors = 1;
+                bytesPerColor = 2;
+                dataType = NDUInt16;
+            case COLOR_CODE_Y16_SIGNED:
+                numColors = 1;
+                bytesPerColor = 2;
+                dataType = NDInt16;
+            case COLOR_CODE_RGB8:
+                numColors = 3;
+                bytesPerColor = 1;
+                dataType = NDUInt8;
+                break;
+            case COLOR_CODE_RGB16:
+                numColors = 3;
+                bytesPerColor = 2;
+                dataType = NDUInt8;
+                break;
+            case COLOR_CODE_RGB16_SIGNED:
+                numColors = 3;
+                bytesPerColor = 2;
+                dataType = NDInt8;
+                break;
+            default:
+                unsupportedFormat = 1;
+                break;
+        }
+    } else {
+        this->pCamera->GetVideoFrameDimensions(&lsizeX, &lsizeY);
+        sizeX = (unsigned short)lsizeX;
+        sizeY = (unsigned short)lsizeY;
+        this->pCamera->GetVideoDataDepth(&depth);
+        mode = this->pCamera->GetVideoMode();
+        switch (format) {
+            case 0:
+                switch (mode) {
+                    case 4: /* RGB 8 */
+                        numColors = 3;
+                        bytesPerColor = 1;
+                        dataType = NDUInt8;
+                        break;
+                    case 5: /* Mono 8 */
+                        numColors = 1;
+                        bytesPerColor = 1;
+                        dataType = NDUInt8;
+                        break;
+                    case 6: /* Mono 16 */
+                        numColors = 1;
+                        bytesPerColor = 2;
+                        dataType = NDUInt16;
+                        break;
+                    default:
+                        unsupportedFormat = 1;
+                        break;
+                }
+                break;
+            case 1:
+            case 2:
+                switch (mode) {
+                    case 1:  /* RGB 8 */
+                    case 4:
+                        numColors = 3;
+                        bytesPerColor = 1;
+                        dataType = NDUInt8;
+                        break;
+                    case 2:
+                    case 5: /* Mono 8 */
+                        numColors = 1;
+                        bytesPerColor = 1;
+                        dataType = NDUInt8;
+                        break;
+                    case 6: /* Mono 16 */
+                    case 7:
+                        numColors = 1;
+                        bytesPerColor = 2;
+                        dataType = NDUInt16;
+                        break;
+                    default:
+                        unsupportedFormat = 1;
+                        break;
+                }
+                break;
+            default:
+                unsupportedFormat = 1;
+                break;
+        }
+            
+    }
+    
+    if (unsupportedFormat) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+            "%s:%s: unsupported format=%d and mode=%d combination\n",
+            driverName, functionName, format, mode);
+        return(asynError);
+    }
+    
     setIntegerParam(ADImageSizeX, sizeX);
     setIntegerParam(ADImageSizeY, sizeY);
+    setIntegerParam(ADDataType, dataType);
+    if (numColors == 3) {
+        colorMode = NDColorModeRGB3;
+    } else {
+        /* If the color mode is currently set to Bayer leave it alone */
+        getIntegerParam(ADColorMode, (int *)&colorMode);
+        if (colorMode != NDColorModeBayer) colorMode = NDColorModeMono;
+    }
     
-    /* Get the data type */
-    getIntegerParam(ADDataType, (int *)&dataType);
-    switch (dataType) {
-        case NDInt8:
-        case NDUInt8:
-            bytesPerColor = 1;
-            break;
-        case NDInt16:
-        case NDUInt16:
-            bytesPerColor = 2;
-            break;
-        default:
-            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-                "Unsupported data type=%d\n", dataType);
-            return(asynError);
-    }
-     /* Get the requested color mode */
-    getIntegerParam(ADColorMode, (int *)&colorMode);
-    switch (colorMode) {
-        case NDColorModeMono:
-        case NDColorModeBayer:
-            numColors = 1;
-            break;
-        case NDColorModeRGB3:
-            numColors = 3;
-            break;
-        default:
-            break;
-    }
+    setIntegerParam(ADColorMode, colorMode);
     dims[0] = sizeX;
     dims[1] = sizeY;
     if (numColors == 1) {
@@ -617,7 +717,13 @@ int FirewireWinDCAM::grabImage()
         case NDColorModeBayer:
             pTmpData = this->pCamera->GetRawData(&dataLength);
             if ((int)dataLength > this->pRaw->dataSize) dataLength = this->pRaw->dataSize;
-            memcpy((unsigned char*)this->pRaw->pData, pTmpData, dataLength);
+            /* The Firewire byte order is big-endian.  If this is 16-bit data and we are on a little-endian
+             * machine we need to swap bytes */
+            if ((bytesPerColor == 1) || (EPICS_BYTE_ORDER == EPICS_ENDIAN_BIG)) {
+                memcpy((unsigned char*)this->pRaw->pData, pTmpData, dataLength);
+            } else {
+                swab((char *)pTmpData, (char *)this->pRaw->pData, dataLength);
+            }
             break;
         case NDColorModeRGB3:
             this->pCamera->getRGB((unsigned char*)this->pRaw->pData, this->pRaw->dataSize);
@@ -1107,6 +1213,8 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
 
     /* Get the size limits */
 	this->pCameraControlSize->GetSizeLimits(&hsMax, &vsMax);
+    setIntegerParam(ADMaxSizeX, hsMax);
+    setIntegerParam(ADMaxSizeY, vsMax);
     /* Get the size units (minimum increment) */
 	this->pCameraControlSize->GetSizeUnits(&hsUnit, &vsUnit);
     /* Get the position limits */
@@ -1114,16 +1222,12 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     /* Get the position units (minimum increment) */
 	this->pCameraControlSize->GetPosUnits(&hpUnit, &vpUnit);
  
- printf("%s:%s hsMax=%d, vsMax=%d, hsUnit=%d, vsUnit=%d, hpMax=%d, vpMax=%d, hpUnit=%d, vpUnit=%d\n", 
- driverName, functionName, hsMax, vsMax, hsUnit, vsUnit,  hpMax, vpMax, hpUnit, vpUnit);
     /* The position limits are defined as the difference from the max size values */
     hpMax = hsMax - hpMax;
     vpMax = vsMax - vpMax;
- printf("%s:%s hsMax=%d, vsMax=%d, hsUnit=%d, vsUnit=%d, hpMax=%d, vpMax=%d, hpUnit=%d, vpUnit=%d\n", 
- driverName, functionName, hsMax, vsMax, hsUnit, vsUnit,  hpMax, vpMax, hpUnit, vpUnit);
-
-printf("%s:%s minX=%d, minY=%d, sizeX=%d, sizeY=%d\n", 
-driverName, functionName, minX, minY, sizeX, sizeY);
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
+        "%s:%s hsMax=%d, vsMax=%d, hsUnit=%d, vsUnit=%d, hpMax=%d, vpMax=%d, hpUnit=%d, vpUnit=%d\n", 
+        driverName, functionName, hsMax, vsMax, hsUnit, vsUnit,  hpMax, vpMax, hpUnit, vpUnit);
 
     /* Force the requested values to obey the increment and range */
     if (sizeX % hsUnit) sizeX = (sizeX/hsUnit) * hsUnit;
@@ -1140,8 +1244,6 @@ driverName, functionName, minX, minY, sizeX, sizeY);
     if (minX > hpMax)  minX = hpMax;
     if (minY < 0) minY = 0;
     if (minY > vpMax)  minY = vpMax;
-printf("%s:%s minX=%d, minY=%d, sizeX=%d, sizeY=%d\n", 
-driverName, functionName, minX, minY, sizeX, sizeY);
  
 	/* attempt to write the parameters to camera */
 	asynPrint( 	pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting format 7 parameters sizeX=%d, sizeY=%d, minX=%d, minY=%d\n",
@@ -1154,12 +1256,12 @@ driverName, functionName, minX, minY, sizeX, sizeY);
     if (status == asynError) goto done;
     this->pCameraControlSize->GetBytesPerPacketRange(&bppMin, &bppMax);
     this->pCameraControlSize->GetBytesPerPacket(&bppCur, &bppRec);
-printf("%s:%s bytes per packet: min=%d, max=%d, current=%d, recommended=%d\n", 
-driverName, functionName, bppMin, bppMax, bppCur, bppRec);
-printf("%s:%s setting bytes per packet=%d\n", 
-driverName, functionName, bppRec);
+    bppAct = bppRec;
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER,
+        "%s:%s bytes per packet: min=%d, max=%d, current=%d, recommended=%d, actually setting=%d\n", 
+        driverName, functionName, bppMin, bppMax, bppCur, bppRec, bppAct);
 
-    err = this->pCameraControlSize->SetBytesPerPacket(bppRec);
+    err = this->pCameraControlSize->SetBytesPerPacket(bppAct);
   	status = PERR( pasynUser, err );
     if (status == asynError) goto done;
 
@@ -1373,7 +1475,6 @@ asynStatus FirewireWinDCAM::stopCapture(asynUser *pasynUser)
     asynStatus status = asynSuccess;
     int err;
     epicsEventWaitStatus eventStatus;
-    int acquiring;
     const char * functionName = "stopCapture";
 
     /* Now wait for the capture thread to actually stop */
