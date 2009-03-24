@@ -992,27 +992,31 @@ driverName, functionName, value);
 	pFeature = this->checkFeature(pasynUser, &featureName);
 	if (!pFeature) return status;
 
-	/* Check the value is within the expected boundaries */
-	pFeature->GetRange(&min, &max);
-	if (value < (epicsInt32)min || value > (epicsInt32)max)
-	{
-		asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s ERROR [%s] setting feature %s, value %d is out of range [%d..%d]\n",
-					driverName, functionName, this->portName, featureName, value, min, max);
-		return asynError;
-	}
-
 asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s disabling abs control\n",
 driverName, functionName);
     /* Disable absolute mode control for this feature */
-epicsThreadSleep(0.01);
 //    err = pFeature->SetAbsControl(FALSE);
 //	status = PERR(pasynUser, err);
 //	if(status == asynError) return status;
 
-epicsThreadSleep(0.01);
  	/* Set the feature value in the camera */
     lo = value & 0xFFF;
     hi = (value >> 12) & 0xFFF;
+	/* Check the value is within the expected boundaries */
+	pFeature->GetRange(&min, &max);
+	if (lo < (epicsInt32)min || lo > (epicsInt32)max)
+	{
+		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, lo %d is out of range [%d..%d]\n",
+					driverName, functionName, this->portName, featureName, lo, min, max);
+		return asynError;
+	}
+	if (hi > (epicsInt32)max)
+	{
+		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, hi %d is out of range [%d..%d]\n",
+					driverName, functionName, this->portName, featureName, hi, min, max);
+		return asynError;
+	}
+
 	err = pFeature->SetValue(lo, hi);
 	status = PERR(pasynUser, err);
 	asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s set value=%d, status=%d\n",
@@ -1498,7 +1502,11 @@ asynStatus FirewireWinDCAM::getAllFeatures()
 		    setIntegerParam(addr, FDC_feat_available, 1);
 		    setIntegerParam(addr, FDC_feat_val, value);
 		    setIntegerParam(addr, FDC_feat_val_min, min);
-		    setIntegerParam(addr, FDC_feat_val_max, max);
+            /* The max for white balance needs special treatment */
+            if (featureIndex[addr] == FEATURE_WHITE_BALANCE) 
+                setIntegerParam(addr, FDC_feat_val_max, (((int)max)<<12) + max);
+		    else
+                setIntegerParam(addr, FDC_feat_val_max, max);
 	        tmp = pFeature->StatusAutoMode();
 		    setIntegerParam(addr, FDC_feat_mode, tmp);
 		} else {
