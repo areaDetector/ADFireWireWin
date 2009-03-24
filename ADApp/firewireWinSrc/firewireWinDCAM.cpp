@@ -801,7 +801,7 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
     if (addr < 0) addr=0;
 
 asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, new value=%d\n",
-		driverName, functionName, function, value, status);
+        driverName, functionName, function, value, status);
     /* Set the value in the parameter library.  This may change later but that's OK */
     status = setIntegerParam(addr, function, value);
 
@@ -859,8 +859,8 @@ asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, new value=%d\n",
     }
 
     /* Call the callback for the specific address .. and address ... weird? */
-	asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, value=%d, status=%d\n",
-			driverName, functionName, function, value, status);
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, value=%d, status=%d\n",
+            driverName, functionName, function, value, status);
             
     callParamCallbacks(addr, addr);
     return status;
@@ -894,8 +894,8 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
         break;
     }
 
-	asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, value=%f, status=%d\n",
-			driverName, functionName, function, value, status);
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, value=%f, status=%d\n",
+            driverName, functionName, function, value, status);
     callParamCallbacks(addr, addr);
     return status;
 }
@@ -918,185 +918,185 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
  */
 C1394CameraControl* FirewireWinDCAM::checkFeature(asynUser *pasynUser, char **featureName)
 {
-	asynStatus status = asynSuccess;
-	int addr;
-	const char* functionName = "checkFeature";
+    asynStatus status = asynSuccess;
+    int addr;
+    const char* functionName = "checkFeature";
     C1394CameraControl *pFeature=NULL;
 
-	pasynManager->getAddr(pasynUser, &addr);
+    pasynManager->getAddr(pasynUser, &addr);
 
-	if (addr < 0 || addr >= num1394Features)
-	{
-		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR addr: %d is out of range [0..%d]\n",
-					driverName, functionName, addr, num1394Features);
-		return NULL;
-	}
+    if (addr < 0 || addr >= num1394Features)
+    {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR addr: %d is out of range [0..%d]\n",
+                    driverName, functionName, addr, num1394Features);
+        return NULL;
+    }
 
     /* Read the information from the camera */
     pFeature = this->pCameraControl[addr];
-	pFeature->Inquire();
+    pFeature->Inquire();
 
-	/* Get a readable name for the feature we are working on */
-	if (*featureName != NULL)
-	{
-		*featureName = (char *)pFeature->GetName();
-	}
+    /* Get a readable name for the feature we are working on */
+    if (*featureName != NULL)
+    {
+        *featureName = (char *)pFeature->GetName();
+    }
 
-	/* check if the feature we are working on is available in this camera */
-	if (!pFeature->HasPresence())
-	{
-		return NULL;
-	}
+    /* check if the feature we are working on is available in this camera */
+    if (!pFeature->HasPresence())
+    {
+        return NULL;
+    }
 
-	return pFeature;
+    return pFeature;
 }
 
 asynStatus FirewireWinDCAM::setFeatureMode(asynUser *pasynUser, epicsInt32 value)
 {
-	asynStatus status = asynSuccess;
-	const char *functionName = "setFeatureMode";
-	char *featureName;
+    asynStatus status = asynSuccess;
+    const char *functionName = "setFeatureMode";
+    char *featureName;
     int err;
     C1394CameraControl *pFeature;
     
-	/* First check if the feature is valid for this camera */
-	pFeature = this->checkFeature(pasynUser, &featureName);
-	if (!pFeature) return asynError;
+    /* First check if the feature is valid for this camera */
+    pFeature = this->checkFeature(pasynUser, &featureName);
+    if (!pFeature) return asynError;
 
-	/* Check if the desired mode is even supported by the camera on this feature */
+    /* Check if the desired mode is even supported by the camera on this feature */
     if (value == 0) {
         if (!pFeature->HasManualMode()) return asynError;
     } else {
         if (!pFeature->HasAutoMode()) return asynError;
     }
 
-	/* Send the feature mode to the cam */
-	err = pFeature->SetAutoMode(value);
-	status = PERR(pasynUser, err);
-	return status;
+    /* Send the feature mode to the cam */
+    err = pFeature->SetAutoMode(value);
+    status = PERR(pasynUser, err);
+    return status;
 }
 
 
 asynStatus FirewireWinDCAM::setFeatureValue(asynUser *pasynUser, epicsInt32 value)
 {
-	asynStatus status = asynSuccess;
+    asynStatus status = asynSuccess;
     int err;
-	unsigned short min, max, lo, hi;
-	const char *functionName = "setFeatureValue";
+    unsigned short min, max, lo, hi;
+    const char *functionName = "setFeatureValue";
     C1394CameraControl *pFeature;
-	char *featureName;
+    char *featureName;
 
-	/* First check if the feature is valid for this camera */
+    /* First check if the feature is valid for this camera */
 asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s entry value=%d\n",
 driverName, functionName, value);
-	pFeature = this->checkFeature(pasynUser, &featureName);
-	if (!pFeature) return status;
+    pFeature = this->checkFeature(pasynUser, &featureName);
+    if (!pFeature) return status;
 
 asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s disabling abs control\n",
 driverName, functionName);
     /* Disable absolute mode control for this feature */
 //    err = pFeature->SetAbsControl(FALSE);
-//	status = PERR(pasynUser, err);
-//	if(status == asynError) return status;
+//    status = PERR(pasynUser, err);
+//    if(status == asynError) return status;
 
- 	/* Set the feature value in the camera */
+     /* Set the feature value in the camera */
     lo = value & 0xFFF;
     hi = (value >> 12) & 0xFFF;
-	/* Check the value is within the expected boundaries */
-	pFeature->GetRange(&min, &max);
-	if (lo < (epicsInt32)min || lo > (epicsInt32)max)
-	{
-		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, lo %d is out of range [%d..%d]\n",
-					driverName, functionName, this->portName, featureName, lo, min, max);
-		return asynError;
-	}
-	if (hi > (epicsInt32)max)
-	{
-		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, hi %d is out of range [%d..%d]\n",
-					driverName, functionName, this->portName, featureName, hi, min, max);
-		return asynError;
-	}
+    /* Check the value is within the expected boundaries */
+    pFeature->GetRange(&min, &max);
+    if (lo < (epicsInt32)min || lo > (epicsInt32)max)
+    {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, lo %d is out of range [%d..%d]\n",
+                    driverName, functionName, this->portName, featureName, lo, min, max);
+        return asynError;
+    }
+    if (hi > (epicsInt32)max)
+    {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, hi %d is out of range [%d..%d]\n",
+                    driverName, functionName, this->portName, featureName, hi, min, max);
+        return asynError;
+    }
 
-	err = pFeature->SetValue(lo, hi);
-	status = PERR(pasynUser, err);
-	asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s set value=%d, status=%d\n",
-			driverName, functionName, value, status);
+    err = pFeature->SetValue(lo, hi);
+    status = PERR(pasynUser, err);
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s set value=%d, status=%d\n",
+            driverName, functionName, value, status);
 asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s exit\n",
 driverName, functionName);
-	return status;
+    return status;
 }
 
 
 asynStatus FirewireWinDCAM::setFeatureAbsValue(asynUser *pasynUser, epicsFloat64 value)
 {
-	asynStatus status = asynSuccess;
+    asynStatus status = asynSuccess;
     int err;
-	float min, max, fvalue;
-	const char *functionName = "setFeatureAbsValue";
+    float min, max, fvalue;
+    const char *functionName = "setFeatureAbsValue";
     C1394CameraControl *pFeature;
-	char *featureName;
+    char *featureName;
 
-	/* First check if the feature is valid for this camera */
-	pFeature = this->checkFeature(pasynUser, &featureName);
-	if (!pFeature) return status;
+    /* First check if the feature is valid for this camera */
+    pFeature = this->checkFeature(pasynUser, &featureName);
+    if (!pFeature) return status;
 
-	/* Check if the specific feature supports absolute values */
-	if (!pFeature->HasAbsControl()) { 
-		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature \'%s\': No absolute control for this feature\n",
-					driverName, functionName, this->portName, featureName);
-		return asynError;
-	}
+    /* Check if the specific feature supports absolute values */
+    if (!pFeature->HasAbsControl()) { 
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature \'%s\': No absolute control for this feature\n",
+                    driverName, functionName, this->portName, featureName);
+        return asynError;
+    }
 
-	/* Check the value is within the expected boundaries */
-	pFeature->GetRangeAbsolute(&min, &max);
-	if (value < min || value > max)
-	{
-		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, value %.5f is out of range [%.3f..%.3f]\n",
-					driverName, functionName, this->portName, featureName, value, min, max);
-		return asynError;
-	}
+    /* Check the value is within the expected boundaries */
+    pFeature->GetRangeAbsolute(&min, &max);
+    if (value < min || value > max)
+    {
+        asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s] setting feature %s, value %.5f is out of range [%.3f..%.3f]\n",
+                    driverName, functionName, this->portName, featureName, value, min, max);
+        return asynError;
+    }
 
     /* Enable absolute mode control for this feature */
     err = pFeature->SetAbsControl(TRUE);
-	status = PERR(pasynUser, err);
-	if(status == asynError) return status;
+    status = PERR(pasynUser, err);
+    if(status == asynError) return status;
 
-	/* Finally set the feature value in the camera */
-	err = pFeature->SetValueAbsolute((float)value);
-	status = PERR(pasynUser, err);
+    /* Finally set the feature value in the camera */
+    err = pFeature->SetValueAbsolute((float)value);
+    status = PERR(pasynUser, err);
 
-	asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s set value to cam: %f, status=%d\n",
-				driverName, functionName, value, status);
+    asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s set value to cam: %f, status=%d\n",
+                driverName, functionName, value, status);
 
-	return status;
+    return status;
 }
 
 /** Set the framerate in the camera. */
 asynStatus FirewireWinDCAM::setVideoFormat( asynUser *pasynUser, epicsInt32 format)
 {
-	asynStatus status = asynSuccess;
-	int err;
-	int wasAcquiring;
-	const char* functionName = "setVideoFormat";
+    asynStatus status = asynSuccess;
+    int err;
+    int wasAcquiring;
+    const char* functionName = "setVideoFormat";
 
-	getIntegerParam(ADAcquire, &wasAcquiring);
-	if (wasAcquiring)
-	{
-		status = this->stopCapture(pasynUser);
-		if (status == asynError) goto done;
-	}
+    getIntegerParam(ADAcquire, &wasAcquiring);
+    if (wasAcquiring)
+    {
+        status = this->stopCapture(pasynUser);
+        if (status == asynError) goto done;
+    }
 
     if (!this->pCamera->HasVideoFormat(format)) {
- 		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s]: camera does not support format %d\n",
-					driverName, functionName, this->portName, format);
-		goto done;
-	}
+         asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s]: camera does not support format %d\n",
+                    driverName, functionName, this->portName, format);
+        goto done;
+    }
 
-	/* attempt to write the format to camera */
-	asynPrint( 	pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting video format:%d\n",
-				driverName, functionName, this->portName,format);
-	err = this->pCamera->SetVideoFormat(format);
-	status = PERR( pasynUser, err );
+    /* attempt to write the format to camera */
+    asynPrint(     pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting video format:%d\n",
+                driverName, functionName, this->portName,format);
+    err = this->pCamera->SetVideoFormat(format);
+    status = PERR( pasynUser, err );
     if (status == asynError) goto done;
     
     /* If the new format is format 7 then set the parameters */
@@ -1109,38 +1109,38 @@ asynStatus FirewireWinDCAM::setVideoFormat( asynUser *pasynUser, epicsInt32 form
 
     done:
     if (wasAcquiring) this->startCapture(pasynUser);
-	return status;
+    return status;
 }
 
 asynStatus FirewireWinDCAM::setVideoMode( asynUser *pasynUser, epicsInt32 mode)
 {
-	asynStatus status = asynSuccess;
-	int err;
-	int wasAcquiring;
+    asynStatus status = asynSuccess;
+    int err;
+    int wasAcquiring;
     int format;
-	const char* functionName = "setVideoMode";
+    const char* functionName = "setVideoMode";
 
-	getIntegerParam(ADAcquire, &wasAcquiring);
-	if (wasAcquiring)
-	{
-		status = this->stopCapture(pasynUser);
-		if (status == asynError) goto done;
-	}
+    getIntegerParam(ADAcquire, &wasAcquiring);
+    if (wasAcquiring)
+    {
+        status = this->stopCapture(pasynUser);
+        if (status == asynError) goto done;
+    }
 
     /* Get the current video format */
     format = this->pCamera->GetVideoFormat();
     if (!this->pCamera->HasVideoMode(format, mode)) {
- 		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s]: camera does not support mode %d\n",
-					driverName, functionName, this->portName, mode);
-		status = asynError;
+         asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s]: camera does not support mode %d\n",
+                    driverName, functionName, this->portName, mode);
+        status = asynError;
         goto done;
-	}
+    }
 
-	/* attempt to write the mode to camera */
-	asynPrint( 	pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting video mode:%d\n",
-				driverName, functionName, this->portName, mode);
-	err = this->pCamera->SetVideoMode(mode);
-	status = PERR( pasynUser, err );
+    /* attempt to write the mode to camera */
+    asynPrint(     pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting video mode:%d\n",
+                driverName, functionName, this->portName, mode);
+    err = this->pCamera->SetVideoMode(mode);
+    status = PERR( pasynUser, err );
     if (status == asynError) goto done;
 
     done:
@@ -1153,39 +1153,39 @@ asynStatus FirewireWinDCAM::setVideoMode( asynUser *pasynUser, epicsInt32 mode)
     this->getAllFeatures();
 
     if (wasAcquiring) this->startCapture(pasynUser);
-	return status;
+    return status;
 }
 
 asynStatus FirewireWinDCAM::setFrameRate( asynUser *pasynUser, epicsInt32 rate)
 {
-	asynStatus status = asynSuccess;
-	unsigned int newframerate = 0;
-	int err;
-	int wasAcquiring;
+    asynStatus status = asynSuccess;
+    unsigned int newframerate = 0;
+    int err;
+    int wasAcquiring;
     int format, mode;
-	const char* functionName = "setFrameRate";
+    const char* functionName = "setFrameRate";
 
-	getIntegerParam(ADAcquire, &wasAcquiring);
-	if (wasAcquiring)
-	{
-		status = this->stopCapture(pasynUser);
-		if (status == asynError) goto done;
-	}
+    getIntegerParam(ADAcquire, &wasAcquiring);
+    if (wasAcquiring)
+    {
+        status = this->stopCapture(pasynUser);
+        if (status == asynError) goto done;
+    }
 
     /* Get the current video format and mode */
     format = this->pCamera->GetVideoFormat();
     mode = this->pCamera->GetVideoMode();
     if (!this->pCamera->HasVideoFrameRate(format, mode, rate)) {
- 		asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s]: camera does not support framerate %d\n",
-					driverName, functionName, this->portName, rate);
-		goto done;
-	}
+         asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s::%s ERROR [%s]: camera does not support framerate %d\n",
+                    driverName, functionName, this->portName, rate);
+        goto done;
+    }
 
-	/* attempt to write the framerate to camera */
-	asynPrint( 	pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting framerate:%d\n",
-				driverName, functionName, this->portName, rate);
-	err = this->pCamera->SetVideoFrameRate(rate);
-	status = PERR( pasynUser, err );
+    /* attempt to write the framerate to camera */
+    asynPrint(     pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting framerate:%d\n",
+                driverName, functionName, this->portName, rate);
+    err = this->pCamera->SetVideoFrameRate(rate);
+    status = PERR( pasynUser, err );
     if (status == asynError) goto done;
 
     done:
@@ -1195,14 +1195,14 @@ asynStatus FirewireWinDCAM::setFrameRate( asynUser *pasynUser, epicsInt32 rate)
     this->getAllFeatures();
 
     if (wasAcquiring) this->startCapture(pasynUser);
-	return status;
+    return status;
 }
 
 asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
 {
-	asynStatus status = asynSuccess;
-	int err;
-	int wasAcquiring;
+    asynStatus status = asynSuccess;
+    int err;
+    int wasAcquiring;
     int format;
     int sizeX, sizeY, minX, minY;
     COLOR_CODE colorCode;
@@ -1211,14 +1211,14 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     unsigned short hpMax, vpMax, hpUnit, vpUnit;
     unsigned short bppMin, bppMax, bppCur, bppRec, bppAct;
     char str[40];
-	const char* functionName = "setFormat7Params";
+    const char* functionName = "setFormat7Params";
 
-	getIntegerParam(ADAcquire, &wasAcquiring);
-	if (wasAcquiring)
-	{
-		status = this->stopCapture(pasynUser);
-		if (status == asynError) goto done;
-	}
+    getIntegerParam(ADAcquire, &wasAcquiring);
+    if (wasAcquiring)
+    {
+        status = this->stopCapture(pasynUser);
+        if (status == asynError) goto done;
+    }
 
     /* Get the current video format */
     format = this->pCamera->GetVideoFormat();
@@ -1232,15 +1232,15 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     getIntegerParam(FDC_colorcode, (int *)&colorCode);
 
     /* Get the size limits */
-	this->pCameraControlSize->GetSizeLimits(&hsMax, &vsMax);
+    this->pCameraControlSize->GetSizeLimits(&hsMax, &vsMax);
     setIntegerParam(ADMaxSizeX, hsMax);
     setIntegerParam(ADMaxSizeY, vsMax);
     /* Get the size units (minimum increment) */
-	this->pCameraControlSize->GetSizeUnits(&hsUnit, &vsUnit);
+    this->pCameraControlSize->GetSizeUnits(&hsUnit, &vsUnit);
     /* Get the position limits */
-	this->pCameraControlSize->GetPosLimits(&hpMax, &vpMax);
+    this->pCameraControlSize->GetPosLimits(&hpMax, &vpMax);
     /* Get the position units (minimum increment) */
-	this->pCameraControlSize->GetPosUnits(&hpUnit, &vpUnit);
+    this->pCameraControlSize->GetPosUnits(&hpUnit, &vpUnit);
  
     /* The position limits are defined as the difference from the max size values */
     hpMax = hsMax - hpMax;
@@ -1265,18 +1265,18 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     if (minY < 0) minY = 0;
     if (minY > vpMax)  minY = vpMax;
  
-	/* attempt to write the parameters to camera */
-	asynPrint( 	pasynUser, ASYN_TRACE_FLOW, 
+    /* attempt to write the parameters to camera */
+    asynPrint(     pasynUser, ASYN_TRACE_FLOW, 
         "%s::%s [%s]: setting format 7 parameters sizeX=%d, sizeY=%d, minX=%d, minY=%d, colorCode=%d\n",
-	    driverName, functionName, this->portName, sizeX, sizeY, minX, minY, colorCode);
-	err = this->pCameraControlSize->SetColorCode(colorCode);
-  	status = PERR( pasynUser, err );
+        driverName, functionName, this->portName, sizeX, sizeY, minX, minY, colorCode);
+    err = this->pCameraControlSize->SetColorCode(colorCode);
+      status = PERR( pasynUser, err );
     if (status == asynError) goto done;
-	err = this->pCameraControlSize->SetPos(minX, minY);
-  	status = PERR( pasynUser, err );
+    err = this->pCameraControlSize->SetPos(minX, minY);
+      status = PERR( pasynUser, err );
     if (status == asynError) goto done;
-	err = this->pCameraControlSize->SetSize(sizeX, sizeY);
-  	status = PERR( pasynUser, err );
+    err = this->pCameraControlSize->SetSize(sizeX, sizeY);
+      status = PERR( pasynUser, err );
     if (status == asynError) goto done;
     this->pCameraControlSize->GetBytesPerPacketRange(&bppMin, &bppMax);
     this->pCameraControlSize->GetBytesPerPacket(&bppCur, &bppRec);
@@ -1286,15 +1286,15 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
         driverName, functionName, bppMin, bppMax, bppCur, bppRec, bppAct);
 
     err = this->pCameraControlSize->SetBytesPerPacket(bppAct);
-  	status = PERR( pasynUser, err );
+      status = PERR( pasynUser, err );
     if (status == asynError) goto done;
 
     done:
     /* Read back the actual values */
-	this->pCameraControlSize->GetPos(&left, &top);
+    this->pCameraControlSize->GetPos(&left, &top);
     setIntegerParam(ADMinX, left);
     setIntegerParam(ADMinY, top);
-	this->pCameraControlSize->GetSize(&width, &height);
+    this->pCameraControlSize->GetSize(&width, &height);
     setIntegerParam(ADSizeX, width);
     setIntegerParam(ADSizeY, height);
     this->pCameraControlSize->GetColorCode((COLOR_CODE *)&colorCode);
@@ -1304,7 +1304,7 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     callParamCallbacks();
 
     if (wasAcquiring) this->startCapture(pasynUser);
-	return status;
+    return status;
 }
 
 
@@ -1427,34 +1427,34 @@ asynStatus FirewireWinDCAM::formatFormat7Modes()
     oldMode = this->pCamera->GetVideoMode();
     oldRate = this->pCamera->GetVideoFrameRate();
 
-	err = this->pCamera->SetVideoFormat(format);
-	status = PERR( this->pasynUserSelf, err );
+    err = this->pCamera->SetVideoFormat(format);
+    status = PERR( this->pasynUserSelf, err );
     if (status == asynError) goto done;
  
     /* Loop over modes */   
     for (mode=0; mode<MAX_1394_VIDEO_MODES; mode++) {
         if (!this->pCamera->HasVideoMode(format, mode)) continue;
-	    err = this->pCamera->SetVideoMode(mode);
-	    status = PERR( this->pasynUserSelf, err );
+        err = this->pCamera->SetVideoMode(mode);
+        status = PERR( this->pasynUserSelf, err );
         if (status == asynError) goto done;
         /* Get the size limits */
-	    this->pCameraControlSize->GetSizeLimits(&hsMax, &vsMax);
+        this->pCameraControlSize->GetSizeLimits(&hsMax, &vsMax);
         /* Get the size units (minimum increment) */
-	    this->pCameraControlSize->GetSizeUnits(&hsUnit, &vsUnit);
+        this->pCameraControlSize->GetSizeUnits(&hsUnit, &vsUnit);
         /* Get the position units (minimum increment) */
-	    this->pCameraControlSize->GetPosUnits(&hpUnit, &vpUnit);
+        this->pCameraControlSize->GetPosUnits(&hpUnit, &vpUnit);
         sprintf(str, "%dx%d (%d,%d)(%d,%d)",
             hsMax, vsMax, hsUnit, vsUnit, hpUnit, vpUnit);
         videoModeStrings[format][mode] = epicsStrDup(str);
     }
     err = this->pCamera->SetVideoFormat(oldFormat);
-	status = PERR( this->pasynUserSelf, err );
+    status = PERR( this->pasynUserSelf, err );
     if (status == asynError) goto done;
     err = this->pCamera->SetVideoMode(oldMode);
-	status = PERR( this->pasynUserSelf, err );
+    status = PERR( this->pasynUserSelf, err );
     if (status == asynError) goto done;
     err = this->pCamera->SetVideoFrameRate(oldRate);
-	status = PERR( this->pasynUserSelf, err );
+    status = PERR( this->pasynUserSelf, err );
     if (status == asynError) goto done;
 
     done:
@@ -1475,86 +1475,86 @@ asynStatus FirewireWinDCAM::formatFormat7Modes()
  */
 asynStatus FirewireWinDCAM::getAllFeatures()
 {
-	asynStatus status = asynSuccess;
-	C1394CameraControl *pFeature;
-	int tmp, addr, value;
+    asynStatus status = asynSuccess;
+    C1394CameraControl *pFeature;
+    int tmp, addr, value;
     unsigned short min, max, lo, hi;
     float fmin, fmax, fvalue;
-	double dtmp;
+    double dtmp;
     const char* functionName="getAllFeatures";
 
-	/* Iterate through all of the available features and update their values and settings  */
-	for (addr = 0; addr < num1394Features; addr++) {
+    /* Iterate through all of the available features and update their values and settings  */
+    for (addr = 0; addr < num1394Features; addr++) {
         pFeature = this->pCameraControl[addr];
         asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: checking feature %d\n",
             driverName, functionName, addr);
 
         /* The Inquire function reads values from the camera into registers */
-	    pFeature->Inquire();
+        pFeature->Inquire();
 
-		/* If the feature is not available in the camera, we just set
-		 * all the parameters to -1 to indicate this is not available to the user. */
-		if (pFeature->HasPresence()) {
-	        pFeature->GetRange(&min, &max);
-		    pFeature->GetValue(&lo, &hi);
+        /* If the feature is not available in the camera, we just set
+         * all the parameters to -1 to indicate this is not available to the user. */
+        if (pFeature->HasPresence()) {
+            pFeature->GetRange(&min, &max);
+            pFeature->GetValue(&lo, &hi);
             value = lo + (hi << 12);
-		    setIntegerParam(addr, FDC_feat_available, 1);
-		    setIntegerParam(addr, FDC_feat_val, value);
-		    setIntegerParam(addr, FDC_feat_val_min, min);
+            setIntegerParam(addr, FDC_feat_available, 1);
+            setIntegerParam(addr, FDC_feat_val, value);
+            setIntegerParam(addr, FDC_feat_val_min, min);
             /* The max for white balance needs special treatment */
             if (featureIndex[addr] == FEATURE_WHITE_BALANCE) 
                 setIntegerParam(addr, FDC_feat_val_max, (((int)max)<<12) + max);
-		    else
+            else
                 setIntegerParam(addr, FDC_feat_val_max, max);
-	        tmp = pFeature->StatusAutoMode();
-		    setIntegerParam(addr, FDC_feat_mode, tmp);
-		} else {
-			setIntegerParam(addr, FDC_feat_available, 0);
-			tmp = -1;
-			dtmp = -1.0;
-			setIntegerParam(addr, FDC_feat_val, tmp);
-			setIntegerParam(addr, FDC_feat_val_min, tmp);
-			setIntegerParam(addr, FDC_feat_val_max, tmp);
-			setIntegerParam(addr, FDC_feat_mode, tmp);
+            tmp = pFeature->StatusAutoMode();
+            setIntegerParam(addr, FDC_feat_mode, tmp);
+        } else {
+            setIntegerParam(addr, FDC_feat_available, 0);
+            tmp = -1;
+            dtmp = -1.0;
+            setIntegerParam(addr, FDC_feat_val, tmp);
+            setIntegerParam(addr, FDC_feat_val_min, tmp);
+            setIntegerParam(addr, FDC_feat_val_max, tmp);
+            setIntegerParam(addr, FDC_feat_mode, tmp);
         }
 
-		/* If the feature does not support 'absolute' control then we just
-		 * set all the absolute values to -1.0 to indicate it is not available to the user */
-	    if (pFeature->HasAbsControl()) { 
+        /* If the feature does not support 'absolute' control then we just
+         * set all the absolute values to -1.0 to indicate it is not available to the user */
+        if (pFeature->HasAbsControl()) { 
             /* The Status function reads absolute values from the camera into registers */
-	        pFeature->Status();
-	        pFeature->GetRangeAbsolute(&fmin, &fmax);
-		    pFeature->GetValueAbsolute(&fvalue);
-		    setIntegerParam(addr, FDC_feat_absolute, 1);
-		    setDoubleParam(addr, FDC_feat_val_abs, fvalue);
-		    setDoubleParam(addr, FDC_feat_val_abs_min, fmin);
-		    setDoubleParam(addr, FDC_feat_val_abs_max, fmax);
-		} else {
-			dtmp = -1.0;
-			setIntegerParam(addr, FDC_feat_absolute, 0);
-			setDoubleParam(addr, FDC_feat_val_abs, dtmp);
-			setDoubleParam(addr, FDC_feat_val_abs_max, dtmp);
-			setDoubleParam(addr, FDC_feat_val_abs_min, dtmp);
+            pFeature->Status();
+            pFeature->GetRangeAbsolute(&fmin, &fmax);
+            pFeature->GetValueAbsolute(&fvalue);
+            setIntegerParam(addr, FDC_feat_absolute, 1);
+            setDoubleParam(addr, FDC_feat_val_abs, fvalue);
+            setDoubleParam(addr, FDC_feat_val_abs_min, fmin);
+            setDoubleParam(addr, FDC_feat_val_abs_max, fmax);
+        } else {
+            dtmp = -1.0;
+            setIntegerParam(addr, FDC_feat_absolute, 0);
+            setDoubleParam(addr, FDC_feat_val_abs, dtmp);
+            setDoubleParam(addr, FDC_feat_val_abs_max, dtmp);
+            setDoubleParam(addr, FDC_feat_val_abs_min, dtmp);
         }
-	}
+    }
 
-	/* Finally map a few of the AreaDetector parameters on to the camera 'features' */
+    /* Finally map a few of the AreaDetector parameters on to the camera 'features' */
     for (addr=0; addr<num1394Features; addr++) {
         if (featureIndex[addr] == FEATURE_SHUTTER) break;
     }
-	getDoubleParam(addr, FDC_feat_val_abs, &dtmp);
-	setDoubleParam(ADAcquireTime, dtmp);
+    getDoubleParam(addr, FDC_feat_val_abs, &dtmp);
+    setDoubleParam(ADAcquireTime, dtmp);
 
     for (addr=0; addr<num1394Features; addr++) {
         if (featureIndex[addr] == FEATURE_GAIN) break;
     }
-	getDoubleParam(addr, FDC_feat_val_abs, &dtmp);
-	setDoubleParam(ADGain, dtmp);
+    getDoubleParam(addr, FDC_feat_val_abs, &dtmp);
+    setDoubleParam(ADGain, dtmp);
     /* Do callbacks for each feature */
     for (addr = 0; addr < num1394Features; addr++) callParamCallbacks(addr, addr);
 
-	return status;
+    return status;
 }
 
 
