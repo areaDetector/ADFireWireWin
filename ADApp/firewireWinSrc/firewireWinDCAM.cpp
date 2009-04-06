@@ -325,7 +325,6 @@ FirewireWinDCAM::FirewireWinDCAM(    const char *portName, const char* camid,
     int err;
     int numCameras;
     int selectedCamera = -1;
-    unsigned short maxSizeX, maxSizeY;
     int i, status, ret;
     char chMode = 'A';
 
@@ -382,13 +381,7 @@ FirewireWinDCAM::FirewireWinDCAM(    const char *portName, const char* camid,
     // We would like to get the camera chip size, but there is really no way to do this.
     // In Format 7 one can call 
     // this->pCameraControlSize->GetSizeLimits(&maxSizeX, &maxSizeY);
-    // buteven that just returns the largest size for that video mode, not for the entire chip. */
-    //status |= setIntegerParam(ADMaxSizeX, maxSizeX);
-    //status |= setIntegerParam(ADMaxSizeY, maxSizeY);
-    //status |= setIntegerParam(ADSizeX, maxSizeX);
-    //status |= setIntegerParam(ADSizeY, maxSizeY);
-    //status |= setIntegerParam(ADImageSizeX, maxSizeX);
-    //status |= setIntegerParam(ADImageSizeY, maxSizeY);
+    // but even that just returns the largest size for that video mode, not for the entire chip. */
     
     /* Create the start and stop event that will be used to signal our
      * image grabbing thread when to start/stop     */
@@ -463,7 +456,7 @@ void FirewireWinDCAM::imageGrabTask()
             {
                 /* Signal someone that the thread is really stopping to wait for start event */
                 asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-                                    "%s::%s [%s]: Signalling stop event\n", driverName, functionName, this->portName);
+                        "%s::%s [%s]: Signalling stop event\n", driverName, functionName, this->portName);
                 epicsEventSignal(this->stopEventId);
             } else externalStopCmd = 1;
 
@@ -545,7 +538,7 @@ void FirewireWinDCAM::imageGrabTask()
             if (status == asynError)
             {
                 asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s::%s [%s] Stopping transmission failed...\n",
-                            driverName, functionName, this->portName);
+                    driverName, functionName, this->portName);
             }
         }
     }/* back to the top... */
@@ -800,8 +793,6 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
     pasynManager->getAddr(pasynUser, &addr);
     if (addr < 0) addr=0;
 
-asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, new value=%d\n",
-        driverName, functionName, function, value, status);
     /* Set the value in the parameter library.  This may change later but that's OK */
     status = setIntegerParam(addr, function, value);
 
@@ -987,13 +978,9 @@ asynStatus FirewireWinDCAM::setFeatureValue(asynUser *pasynUser, epicsInt32 valu
     char *featureName;
 
     /* First check if the feature is valid for this camera */
-asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s entry value=%d\n",
-driverName, functionName, value);
     pFeature = this->checkFeature(pasynUser, &featureName);
     if (!pFeature) return status;
 
-asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s disabling abs control\n",
-driverName, functionName);
     /* Disable absolute mode control for this feature */
 //    err = pFeature->SetAbsControl(FALSE);
 //    status = PERR(pasynUser, err);
@@ -1021,8 +1008,6 @@ driverName, functionName);
     status = PERR(pasynUser, err);
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s set value=%d, status=%d\n",
             driverName, functionName, value, status);
-asynPrint(this->pasynUserSelf, ASYN_TRACEIO_DRIVER, "%s::%s exit\n",
-driverName, functionName);
     return status;
 }
 
@@ -1031,7 +1016,7 @@ asynStatus FirewireWinDCAM::setFeatureAbsValue(asynUser *pasynUser, epicsFloat64
 {
     asynStatus status = asynSuccess;
     int err;
-    float min, max, fvalue;
+    float min, max;
     const char *functionName = "setFeatureAbsValue";
     C1394CameraControl *pFeature;
     char *featureName;
@@ -1137,7 +1122,7 @@ asynStatus FirewireWinDCAM::setVideoMode( asynUser *pasynUser, epicsInt32 mode)
     }
 
     /* attempt to write the mode to camera */
-    asynPrint(     pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting video mode:%d\n",
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting video mode:%d\n",
                 driverName, functionName, this->portName, mode);
     err = this->pCamera->SetVideoMode(mode);
     status = PERR( pasynUser, err );
@@ -1182,7 +1167,7 @@ asynStatus FirewireWinDCAM::setFrameRate( asynUser *pasynUser, epicsInt32 rate)
     }
 
     /* attempt to write the framerate to camera */
-    asynPrint(     pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting framerate:%d\n",
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s]: setting framerate:%d\n",
                 driverName, functionName, this->portName, rate);
     err = this->pCamera->SetVideoFrameRate(rate);
     status = PERR( pasynUser, err );
@@ -1266,7 +1251,7 @@ asynStatus FirewireWinDCAM::setFormat7Params( asynUser *pasynUser)
     if (minY > vpMax)  minY = vpMax;
  
     /* attempt to write the parameters to camera */
-    asynPrint(     pasynUser, ASYN_TRACE_FLOW, 
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, 
         "%s::%s [%s]: setting format 7 parameters sizeX=%d, sizeY=%d, minX=%d, minY=%d, colorCode=%d\n",
         driverName, functionName, this->portName, sizeX, sizeY, minX, minY, colorCode);
     err = this->pCameraControlSize->SetColorCode(colorCode);
@@ -1569,7 +1554,7 @@ asynStatus FirewireWinDCAM::startCapture(asynUser *pasynUser)
     getDoubleParam(ADAcquireTime, &timeout);
     if (timeout < 1.0) timeout = 1.0;
     
-    asynPrint( pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] Starting firewire transmission\n",
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] Starting firewire transmission\n",
                 driverName, functionName, this->portName);
     /* Start the camera transmission... */
     err = this->pCamera->StartImageAcquisitionEx(MAX_1394_BUFFERS, (int)(1000*timeout), ACQ_START_VIDEO_STREAM);
@@ -1598,7 +1583,7 @@ asynStatus FirewireWinDCAM::stopCapture(asynUser *pasynUser)
     const char * functionName = "stopCapture";
 
     /* Now wait for the capture thread to actually stop */
-    asynPrint( pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] waiting for stopped event...\n",
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] waiting for stopped event...\n",
                     driverName, functionName, this->portName);
     /* unlock the mutex while we're waiting for the capture thread to stop acquiring */
     epicsMutexUnlock(this->mutexId);
@@ -1606,11 +1591,11 @@ asynStatus FirewireWinDCAM::stopCapture(asynUser *pasynUser)
     epicsMutexLock(this->mutexId);
     if (eventStatus != epicsEventWaitOK)
     {
-        asynPrint( pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] ERROR: Timeout when trying to stop image grabbing thread.\n",
+        asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] ERROR: Timeout when trying to stop image grabbing thread.\n",
                     driverName, functionName, this->portName);
     }
 
-    asynPrint( pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] Stopping firewire transmission\n",
+    asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] Stopping firewire transmission\n",
                 driverName, functionName, this->portName);
 
     /* Stop the actual transmission! */
@@ -1640,7 +1625,7 @@ asynStatus FirewireWinDCAM::err( asynUser* asynUser, int CAM_err, int errOriginL
 
     if (this->pasynUserSelf == NULL) fprintf(stderr, "### ERROR port=%s line=%d, error=%d (%s)\n", 
         this->portName, errOriginLine, CAM_err, errMsg[-CAM_err]);
-    else asynPrint( this->pasynUserSelf, ASYN_TRACE_ERROR, "### ERROR port=%s line=%d, error=%d (%s)\n", 
+    else asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "### ERROR port=%s line=%d, error=%d (%s)\n", 
         this->portName, errOriginLine, CAM_err, errMsg[-CAM_err]);
     return asynError;
 }
@@ -1668,7 +1653,7 @@ asynStatus FirewireWinDCAM::drvUserCreate( asynUser *pasynUser, const char *drvI
         pasynUser->reason = param;
         if (pptypeName) { *pptypeName = epicsStrDup(drvInfo); }
         if (psize) { *psize = sizeof(param); }
-        asynPrint(    pasynUser, ASYN_TRACE_FLOW, "%s:%s: drvInfo=%s, param=%d\n",
+        asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s: drvInfo=%s, param=%d\n",
                     driverName, functionName, drvInfo, param);
         return asynSuccess;
     }
