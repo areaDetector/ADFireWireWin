@@ -40,7 +40,6 @@
 #include <epicsTime.h>
 #include <epicsThread.h>
 #include <epicsEvent.h>
-#include <epicsMutex.h>
 #include <epicsEndian.h>
 
 /* Dependency support modules includes:
@@ -439,7 +438,7 @@ void FirewireWinDCAM::imageGrabTask()
 
     epicsEventTryWait(this->stopEventId); /* clear the stop event if it wasn't already */
 
-    epicsMutexLock(this->mutexId);
+    this->lock();
 
     while (1) /* ... round and round and round we go ... */
     {
@@ -461,7 +460,7 @@ void FirewireWinDCAM::imageGrabTask()
             } else externalStopCmd = 1;
 
             /* Release the lock while we wait for an event that says acquire has started, then lock again */
-            epicsMutexUnlock(this->mutexId);
+            this->unlock();
 
 
             /* Wait for a signal that tells this thread that the transmission
@@ -471,7 +470,7 @@ void FirewireWinDCAM::imageGrabTask()
             status = epicsEventWait(this->startEventId);
             asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
                     "%s::%s [%s]: started!\n", driverName, functionName, this->portName);
-            epicsMutexLock(this->mutexId);
+            this->lock();
             setIntegerParam(ADNumImagesCounter, 0);
             setIntegerParam(ADAcquire, 1);
         }
@@ -519,9 +518,9 @@ void FirewireWinDCAM::imageGrabTask()
             /* Call the NDArray callback */
             /* Must release the lock here, or we can get into a deadlock, because we can
              * block on the plugin lock, and the plugin can be calling us */
-            epicsMutexUnlock(this->mutexId);
+            this->unlock();
             doCallbacksGenericPointer(this->pRaw, NDArrayData, 0);
-            epicsMutexLock(this->mutexId);
+            this->lock();
         }
         /* Release the NDArray buffer now that we are done with it.
          * After the callback just above we don't need it anymore */
@@ -547,7 +546,7 @@ void FirewireWinDCAM::imageGrabTask()
 
 /** Grabs one image off the dc1394 queue, notifies areaDetector about it and
  * finally clears the buffer off the dc1394 queue.
- * This function expects the mutex to be locked already by the caller!
+ * This function expects the driver to be locked already by the caller!
  */
 int FirewireWinDCAM::grabImage()
 {
@@ -570,11 +569,11 @@ int FirewireWinDCAM::grabImage()
     int unsupportedFormat = 0;
     const char* functionName = "grabImage";
 
-    /* unlock the mutex while we wait for a new image to be ready */
-    epicsMutexUnlock(this->mutexId);
+    /* unlock the driver while we wait for a new image to be ready */
+    this->unlock();
     err = this->pCamera->AcquireImageEx(TRUE, &droppedFrames);
     status = PERR( this->pasynUserSelf, err );
-    epicsMutexLock(this->mutexId);
+    this->lock();
     if (status) return status;   /* if we didn't get an image properly... */
 
     /* Get the current video format */
@@ -774,8 +773,7 @@ int FirewireWinDCAM::grabImage()
     setIntegerParam(ADStatus, ADStatusReadout);
     callParamCallbacks();
 
-    this->pRaw->colorMode = colorMode;
-    this->pRaw->bayerPattern = NDBayerRGGB;
+    this->pRaw->addAttribute("colorMode", NDAttrInt32, &colorMode);
 
     return (status);
 }
@@ -1585,10 +1583,10 @@ asynStatus FirewireWinDCAM::stopCapture(asynUser *pasynUser)
     /* Now wait for the capture thread to actually stop */
     asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] waiting for stopped event...\n",
                     driverName, functionName, this->portName);
-    /* unlock the mutex while we're waiting for the capture thread to stop acquiring */
-    epicsMutexUnlock(this->mutexId);
+    /* unlock the driver while we're waiting for the capture thread to stop acquiring */
+    this->unlock();
     eventStatus = epicsEventWaitWithTimeout(this->stopEventId, 3.0);
-    epicsMutexLock(this->mutexId);
+    this->lock();
     if (eventStatus != epicsEventWaitOK)
     {
         asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s::%s [%s] ERROR: Timeout when trying to stop image grabbing thread.\n",
