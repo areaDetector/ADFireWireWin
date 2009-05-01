@@ -233,7 +233,7 @@ static int num1394Features = sizeof(featureIndex) / sizeof(featureIndex[0]);
 /** Specific asyn commands for this support module. These will be used and
  * managed by the parameter library (part of areaDetector). */
 typedef enum FDCParam_t {
-    FDC_feat_val = ADFirstDriverParam, /** Feature value (int32 read/write) addr: 0-17 */
+    FDC_feat_val = ADLastStdParam,     /** Feature value (int32 read/write) addr: 0-17 */
     FDC_feat_val_max,                  /** Feature maximum boundry value (int32 read) addr: 0-17 */
     FDC_feat_val_min,                  /** Feature minimum boundry value (int32 read)  addr: 0-17*/
     FDC_feat_val_abs,                  /** Feature absolute value (float64 read/write) addr: 0-17 */
@@ -389,7 +389,7 @@ FirewireWinDCAM::FirewireWinDCAM(    const char *portName, const char* camid,
     this->stopEventId = epicsEventCreate(epicsEventFull);
     printf("OK\n");
 
-    status |= setIntegerParam(ADDataType, NDUInt8);
+    status |= setIntegerParam(NDDataType, NDUInt8);
     status |= setIntegerParam(ADImageMode, ADImageContinuous);
     status |= setIntegerParam(ADNumImages, 100);
     printf("Creating Formet 7 mode strings...                 ");
@@ -496,14 +496,14 @@ void FirewireWinDCAM::imageGrabTask()
         }
 
         /* Set a bit of image/frame statistics... */
-        getIntegerParam(ADImageCounter, &imageCounter);
+        getIntegerParam(NDArrayCounter, &imageCounter);
         getIntegerParam(ADNumImages, &numImages);
         getIntegerParam(ADNumImagesCounter, &numImagesCounter);
         getIntegerParam(ADImageMode, &imageMode);
-        getIntegerParam(ADArrayCallbacks, &arrayCallbacks);
+        getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
         imageCounter++;
         numImagesCounter++;
-        setIntegerParam(ADImageCounter, imageCounter);
+        setIntegerParam(NDArrayCounter, imageCounter);
         setIntegerParam(ADNumImagesCounter, numImagesCounter);
         /* Put the frame number into the buffer */
         this->pRaw->uniqueId = imageCounter;
@@ -703,18 +703,18 @@ int FirewireWinDCAM::grabImage()
         return(asynError);
     }
     
-    setIntegerParam(ADImageSizeX, sizeX);
-    setIntegerParam(ADImageSizeY, sizeY);
-    setIntegerParam(ADDataType, dataType);
+    setIntegerParam(NDArraySizeX, sizeX);
+    setIntegerParam(NDArraySizeY, sizeY);
+    setIntegerParam(NDDataType, dataType);
     if (numColors == 3) {
         colorMode = NDColorModeRGB1;
     } else {
         /* If the color mode is currently set to Bayer leave it alone */
-        getIntegerParam(ADColorMode, (int *)&colorMode);
+        getIntegerParam(NDColorMode, (int *)&colorMode);
         if (colorMode != NDColorModeBayer) colorMode = NDColorModeMono;
     }
     
-    setIntegerParam(ADColorMode, colorMode);
+    setIntegerParam(NDColorMode, colorMode);
     if (numColors == 1) {
         ndims = 2;
         dims[0] = sizeX;
