@@ -7,7 +7,6 @@ include $(TOP)/configure/CONFIG
 
 LIBRARY_IOC_WIN32 += firewireWinDCAM
 # The following are compiled and added to the support library
-LIB_SRCS += drvFirewireWinDCAM.c
 LIB_SRCS += firewireWinDCAM.cpp
 
 DBD += firewireWinDCAMSupport.dbd
