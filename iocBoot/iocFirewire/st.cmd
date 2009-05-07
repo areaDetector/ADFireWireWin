@@ -20,13 +20,13 @@ dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/firewireDCAM.template",   "P=13FW1:,R=c
 dbLoadTemplate("firewire.substitutions")
 
 # Create a standard arrays plugin, set it to get 8-bit data from the driver.
-drvNDStdArraysConfigure("FW1Image", 5, 0, "FW1", 0, -1)
+NDStdArraysConfigure("FW1Image", 5, 0, "FW1", 0, -1)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=13FW1:,R=image1:,PORT=FW1Image,ADDR=0,TIMEOUT=1,NDARRAY_PORT=FW1,NDARRAY_ADDR=0")
 # This is enough elements for 1376*1024*3
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=13FW1:,R=image1:,PORT=FW1Image,ADDR=0,TIMEOUT=1,SIZE=8,FTVL=UCHAR,NELEMENTS=4227072")
 
 # Create a second standard arrays plugin, set it to get 16-bit data from the driver.
-drvNDStdArraysConfigure("FW1Image2", 5, 0, "FW1", 0, -1)
+NDStdArraysConfigure("FW1Image2", 5, 0, "FW1", 0, -1)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=13FW1:,R=image2:,PORT=FW1Image2,ADDR=0,TIMEOUT=1,NDARRAY_PORT=FW1,NDARRAY_ADDR=0")
 # This is enough elements for 1376*1024*3
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=13FW1:,R=image2:,PORT=FW1Image2,ADDR=0,TIMEOUT=1,SIZE=16,FTVL=SHORT,NELEMENTS=4227072")
@@ -35,12 +35,12 @@ dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=13FW1:,R=imag
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/EPICS_AD_Viewer.template", "P=13FW1:, R=image1:")
 
 # Create a file saving plugin
-drvNDFileNetCDFConfigure("FW1File", 5, 0, "FW1", 0)
+NDFileNetCDFConfigure("FW1File", 5, 0, "FW1", 0)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=13FW1:,R=file1:,PORT=FW1File,ADDR=0,TIMEOUT=1,NDARRAY_PORT=FW1,NDARRAY_ADDR=0")
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDFile.template",      "P=13FW1:,R=file1:,PORT=FW1File,ADDR=0,TIMEOUT=1")
 
 # Create an ROI plugin
-drvNDROIConfigure("FW1ROI", 5, 0, "FW1", 0, 10, 20, -1)
+NDROIConfigure("FW1ROI", 5, 0, "FW1", 0, 10, 20, -1)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=13FW1:,R=ROI1:,  PORT=FW1ROI,ADDR=0,TIMEOUT=1,NDARRAY_PORT=FW1,NDARRAY_ADDR=0")
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDROI.template",       "P=13FW1:,R=ROI1:,  PORT=FW1ROI,ADDR=0,TIMEOUT=1")
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDROIN.template",      "P=13FW1:,R=ROI1:0:,PORT=FW1ROI,ADDR=0,TIMEOUT=1,HIST_SIZE=256")
@@ -49,7 +49,7 @@ dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDROIN.template",      "P=13FW1:,R=ROI1
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDROIN.template",      "P=13FW1:,R=ROI1:3:,PORT=FW1ROI,ADDR=3,TIMEOUT=1,HIST_SIZE=256")
 
 # Create a color conversion plugin
-drvNDColorConvertConfigure("FW1CC1", 5, 0, "FW1", 0, 20, -1)
+NDColorConvertConfigure("FW1CC1", 5, 0, "FW1", 0, 20, -1)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","   P=13FW1:,R=CC1:,  PORT=FW1CC1,ADDR=0,TIMEOUT=1,NDARRAY_PORT=FW1,NDARRAY_ADDR=0")
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDColorConvert.template", "P=13FW1:,R=CC1:,  PORT=FW1CC1,ADDR=0,TIMEOUT=1")
 
