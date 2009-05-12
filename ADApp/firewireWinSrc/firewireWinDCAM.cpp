@@ -1741,5 +1741,7 @@ static void firewireWinDCAMRegister(void)
     iocshRegister(&configFirewireWinDCAM, configCallFunc);
 }
 
+extern "C" {
 epicsExportRegistrar(firewireWinDCAMRegister);
+}
 
