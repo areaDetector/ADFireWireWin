@@ -510,6 +510,9 @@ void FirewireWinDCAM::imageGrabTask()
         /* Set a timestamp in the buffer */
         this->pRaw->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
 
+        /* Get any attributes that have been defined for this driver */        
+        this->getAttributes(this->pRaw);
+
         /* Call the callbacks to update any changes */
         callParamCallbacks();
 
@@ -845,6 +848,10 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
         status = this->setFrameRate(pasynUser, value);
         break;
 
+    default:
+        /* If this parameter belongs to a base class call its method */
+        if (function < ADLastStdParam) status = ADDriver::writeInt32(pasynUser, value);
+        break;
     }
 
     /* Call the callback for the specific address .. and address ... weird? */
@@ -880,6 +887,10 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
         status = this->setFeatureAbsValue(pasynUser, value);
         /* update all feature values to check if any settings have changed */
         status = this->getAllFeatures();
+        break;
+    default:
+        /* If this parameter belongs to a base class call its method */
+        if (function < ADLastStdParam) status = ADDriver::writeFloat64(pasynUser, value);
         break;
     }
 
