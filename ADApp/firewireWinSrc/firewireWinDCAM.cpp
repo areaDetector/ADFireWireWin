@@ -1625,7 +1625,7 @@ asynStatus FirewireWinDCAM::stopCapture(asynUser *pasynUser)
 /** Parse a dc1394 error code into a user readable string
  * Defaults to printing out using the pasynUser.
  * \param asynUser The asyn user to print out with on ASYN_TRACE_ERR. If pasynUser == NULL just print to stderr.
- * \param dc1394_err The error code, returned from the dc1394 function call. If the error code is OK we just ignore it.
+ * \param CAM_err The error code, returned from the dc1394 function call. If the error code is OK we just ignore it.
  * \param errOriginLine Line number where the error came from.
  */
 asynStatus FirewireWinDCAM::err( asynUser* asynUser, int CAM_err, int errOriginLine)
