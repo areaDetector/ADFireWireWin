@@ -511,7 +511,7 @@ void FirewireWinDCAM::imageGrabTask()
         this->pRaw->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
 
         /* Get any attributes that have been defined for this driver */        
-        this->getAttributes(this->pRaw->pAttributes);
+        this->getAttributes(this->pRaw->pAttributeList);
 
         /* Call the callbacks to update any changes */
         callParamCallbacks();
@@ -776,7 +776,7 @@ int FirewireWinDCAM::grabImage()
     setIntegerParam(ADStatus, ADStatusReadout);
     callParamCallbacks();
 
-    this->pRaw->pAttributeList->add("colorMode", NDAttrInt32, &colorMode);
+    this->pRaw->pAttributeList->add("colorMode", "Color mode", NDAttrInt32, &colorMode);
 
     return (status);
 }
