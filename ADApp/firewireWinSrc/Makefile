@@ -28,7 +28,7 @@ PROD_LIBS += asyn
 PROD_LIBS += 1394camera
 PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
 
-PROD_LIBS += libtiff jpeg
+PROD_LIBS     += libtiff jpeg libNeXus.dll
 PROD_SYS_LIBS += nafxcw
 
 LIB_INSTALLS += ../1394camera.lib
