@@ -76,16 +76,17 @@ class FirewireWinDCAM : public ADDriver
 public:
     FirewireWinDCAM(const char *portName, const char* camid,
                  int maxBuffers, size_t maxMemory,
-                 int priority, int queueSize);
+                 int priority, int stackSize);
 
     /* virtual methods to override from ADDriver */
     virtual asynStatus writeInt32( asynUser *pasynUser, epicsInt32 value);
     virtual asynStatus writeFloat64( asynUser *pasynUser, epicsFloat64 value);
     virtual asynStatus drvUserCreate( asynUser *pasynUser, const char *drvInfo, const char **pptypeName, size_t *psize);
     void report(FILE *fp, int details);
+    void imageGrabTask();  /**< This should be private but is called from C callback function, must be public. */
 
+private:
     /* Local methods to this class */
-    void imageGrabTask();
     int grabImage();
     asynStatus startCapture(asynUser *pasynUser);
     asynStatus stopCapture(asynUser *pasynUser);
@@ -119,19 +120,22 @@ public:
  *
  * This function need to be called once for each camera to be used by the IOC. A call to this
  * function instanciates one object from the FirewireWinDCAM class.
- * portName Asyn port name to assign to the camera.
- * camid The camera ID or serial number in a hexadecimal string. Lower case and
- *              upper case letters can be used. This is used to identify a specific camera
- *              on the bus. For instance: "0x00b09d01007139d0".
- * maxBuffers Maxiumum number of NDArray objects (image buffers) this driver is allowed to allocate.
- *                   This driver requires 2 buffers, and each queue element in a plugin can require one buffer
- *                   which will all need to be added up in this parameter.
- * maxMemory Maximum memory (in bytes) that this driver is allowed to allocate. So if max. size = 1024x768 (8bpp)
- *                  and maxBuffers is, say 14. maxMemory = 1024x768x14 = 11010048 bytes (~11MB)
+ * \param[in] portName Asyn port name to assign to the camera.
+ * \param[in] camid The camera ID or serial number in a hexadecimal string. Lower case and
+ *            upper case letters can be used. This is used to identify a specific camera
+ *            on the bus. For instance: "0x00b09d01007139d0".  If this parameter is empty ("")
+ *            then the first camera found on the Firewire bus will be used.
+ * \param[in] maxBuffers Maxiumum number of NDArray objects (image buffers) this driver is allowed to allocate.
+ *            This driver requires 2 buffers, and each queue element in a plugin can require one buffer
+ *            which will all need to be added up in this parameter. Use -1 for unlimited.
+ * \param[in] maxMemory Maximum memory (in bytes) that this driver is allowed to allocate. So if max. size = 1024x768 (8bpp)
+ *            and maxBuffers is, say 14. maxMemory = 1024x768x14 = 11010048 bytes (~11MB). Use -1 for unlimited.
+ * \param[in] priority The EPICS thread priority for this driver.  0=use asyn default.
+ * \param[in] stackSize The size of the stack for the EPICS port thread. 0=use asyn default.
  */
-extern "C" int WinFDC_Config(const char *portName, const char* camid, int maxBuffers, size_t maxMemory, int priority, int queueSize)
+extern "C" int WinFDC_Config(const char *portName, const char* camid, int maxBuffers, size_t maxMemory, int priority, int stackSize)
 {
-    new FirewireWinDCAM( portName, camid, maxBuffers, maxMemory, priority, queueSize);
+    new FirewireWinDCAM( portName, camid, maxBuffers, maxMemory, priority, stackSize);
     return asynSuccess;
 }
 
@@ -303,17 +307,23 @@ static void imageGrabTaskC(void *drvPvt)
  * Initialises the camera object by setting all the default parameters and initializing
  * the camera hardware with it. This function also reads out the current settings of the
  * camera and prints out a selection of parameters to the shell.
- * portName The asyn port name to give the particular instance.
- * camid The unique ID stored in the camera.
- * maxBuffers The largest number of image buffers this driver can create.
- * maxMemory The maximum amount of memory in bytes that the driver can allocate for images.
- * priority The priority for the asyn port driver and the imageGrabTask
- * queueSize The queue size for the asyn port driver and the imageGrabTask
+ * \param[in] portName Asyn port name to assign to the camera driver.
+ * \param[in] camid The camera ID or serial number in a hexadecimal string. Lower case and
+ *            upper case letters can be used. This is used to identify a specific camera
+ *            on the bus. For instance: "0x00b09d01007139d0".  If this parameter is empty ("")
+ *            then the first camera found on the Firewire bus will be used.
+ * \param[in] maxBuffers Maxiumum number of NDArray objects (image buffers) this driver is allowed to allocate.
+ *            This driver requires 2 buffers, and each queue element in a plugin can require one buffer
+ *            which will all need to be added up in this parameter. Use -1 for unlimited.
+ * \param[in] maxMemory Maximum memory (in bytes) that this driver is allowed to allocate. So if max. size = 1024x768 (8bpp)
+ *            and maxBuffers is, say 14. maxMemory = 1024x768x14 = 11010048 bytes (~11MB). Use -1 for unlimited.
+ * \param[in] priority The EPICS thread priority for this asyn port driver.  0=use asyn default.
+ * \param[in] stackSize The size of the stack for the asyn port thread. 0=use asyn default.
  */
 FirewireWinDCAM::FirewireWinDCAM(    const char *portName, const char* camid, 
-                            int maxBuffers, size_t maxMemory, int priority, int queueSize )
+                            int maxBuffers, size_t maxMemory, int priority, int stackSize )
     : ADDriver(portName, num1394Features, ADLastDriverParam, maxBuffers, maxMemory, 0, 0,
-               ASYN_CANBLOCK | ASYN_MULTIDEVICE, 1, priority, queueSize),
+               ASYN_CANBLOCK | ASYN_MULTIDEVICE, 1, priority, stackSize),
         pRaw(NULL)
 {
     const char *functionName = "FirewireWinDCAM";
@@ -782,7 +792,12 @@ int FirewireWinDCAM::grabImage()
 }
 
 
-/** Write integer value to the drivers parameter table. */
+/** Sets an int32 parameter.
+  * \param[in] pasynUser asynUser structure that contains the function code in pasynUser->reason. 
+  * \param[in] value The value for this parameter 
+  *
+  * Takes action if the function code requires it.  ADAcquire, ADSizeX, and many other
+  * function codes make calls to the Firewire library from this function. */
 asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
 {
     asynStatus status = asynSuccess;
@@ -862,7 +877,12 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
     return status;
 }
 
-/** Write floating point value to the drivers parameter table and possibly to the hardware. */
+/** Sets an float64 parameter.
+  * \param[in] pasynUser asynUser structure that contains the function code in pasynUser->reason. 
+  * \param[in] value The value for this parameter 
+  *
+  * Takes action if the function code requires it.  The FDC_feat_val_abs
+  * function code makes calls to the Firewire library from this function. */
 asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 value)
 {
     asynStatus status = asynSuccess;
@@ -1672,7 +1692,10 @@ asynStatus FirewireWinDCAM::drvUserCreate( asynUser *pasynUser, const char *drvI
     return status;
 }
 
-/** Print out a report.
+/** Print out a report; calls ADDriver::report to get base class report as well.
+  * \param[in] fp File pointer to write output to
+  * \param[in] details Level of detail desired.  If >1 prints information about 
+               supported video formats and modes, etc.
  */
 void FirewireWinDCAM::report(FILE *fp, int details)
 {
