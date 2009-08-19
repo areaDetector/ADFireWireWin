@@ -786,7 +786,7 @@ int FirewireWinDCAM::grabImage()
     setIntegerParam(ADStatus, ADStatusReadout);
     callParamCallbacks();
 
-    this->pRaw->pAttributeList->add("colorMode", "Color mode", NDAttrInt32, &colorMode);
+    this->pRaw->pAttributeList->add("ColorMode", "Color mode", NDAttrInt32, &colorMode);
 
     return (status);
 }
