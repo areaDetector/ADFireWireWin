@@ -29,7 +29,14 @@ PROD_LIBS += 1394camera
 PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 PROD_LIBS     += libtiff jpeg libNeXus.dll
-PROD_SYS_LIBS += nafxcw
+# If we don't include nafxcw in the link command then VS links the C runtime before
+# MFC and we get errors that operator new and delete are multiply defined.
+ifeq ($(T_A), win32-x86)
+PROD_SYS_LIBS      += nafxcw
+endif
+ifeq ($(T_A), win32-x86-debug)
+PROD_SYS_LIBS      += nafxcwd
+endif
 
 LIB_INSTALLS += ../1394camera.lib
 
