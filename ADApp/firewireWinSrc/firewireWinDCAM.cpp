@@ -65,6 +65,34 @@
 
 #define MAX(x,y) ((x)>(y)?(x):(y))
 
+/** Specific asyn commands for this support module. These will be used and
+ * managed by the parameter library (part of areaDetector). */
+#define FDC_feat_valString           "FDC_FEAT_VAL"
+#define FDC_feat_val_maxString       "FDC_FEAT_VAL_MAX"
+#define FDC_feat_val_minString       "FDC_FEAT_VAL_MIN"
+#define FDC_feat_val_absString       "FDC_FEAT_VAL_ABS"
+#define FDC_feat_val_abs_maxString   "FDC_FEAT_VAL_ABS_MAX"
+#define FDC_feat_val_abs_minString   "FDC_FEAT_VAL_ABS_MIN"
+#define FDC_feat_modeString          "FDC_FEAT_MODE"
+#define FDC_feat_availableString     "FDC_FEAT_AVAILABLE"
+#define FDC_feat_absoluteString      "FDC_FEAT_ABSOLUTE"
+#define FDC_formatString             "FDC_FORMAT"
+#define FDC_modeString               "FDC_MODE"
+#define FDC_framerateString          "FDC_FRAMERATE"
+#define FDC_colorcodeString          "FDC_COLORCODE"
+#define FDC_valid_formatString       "FDC_VALID_FORMAT"
+#define FDC_valid_modeString         "FDC_VALID_MODE"
+#define FDC_valid_framerateString    "FDC_VALID_FRAMERATE"
+#define FDC_valid_colorcodeString    "FDC_VALID_COLORCODE"
+#define FDC_has_formatString         "FDC_HAS_FORMAT"
+#define FDC_has_modeString           "FDC_HAS_MODE"
+#define FDC_has_framerateString      "FDC_HAS_FRAMERATE"
+#define FDC_has_colorcodeString      "FDC_HAS_COLORCODE"
+#define FDC_current_formatString     "FDC_CURRENT_FORMAT"
+#define FDC_current_modeString       "FDC_CURRENT_MODE"
+#define FDC_current_framerateString  "FDC_CURRENT_FRAMERATE"
+#define FDC_current_colorcodeString  "FDC_CURRENT_COLORCODE"
+
 /** Only used for debugging/error messages to identify where the message comes from*/
 static const char *driverName = "FirewireWinDCAM";
 
@@ -81,9 +109,37 @@ public:
     /* virtual methods to override from ADDriver */
     virtual asynStatus writeInt32( asynUser *pasynUser, epicsInt32 value);
     virtual asynStatus writeFloat64( asynUser *pasynUser, epicsFloat64 value);
-    virtual asynStatus drvUserCreate( asynUser *pasynUser, const char *drvInfo, const char **pptypeName, size_t *psize);
     void report(FILE *fp, int details);
     void imageGrabTask();  /**< This should be private but is called from C callback function, must be public. */
+
+protected:
+    int FDC_feat_val;                       /** Feature value (int32 read/write) addr: 0-17 */
+    #define FIRST_FDC_PARAM FDC_feat_val
+    int FDC_feat_val_max;                  /** Feature maximum boundry value (int32 read) addr: 0-17 */
+    int FDC_feat_val_min;                  /** Feature minimum boundry value (int32 read)  addr: 0-17*/
+    int FDC_feat_val_abs;                  /** Feature absolute value (float64 read/write) addr: 0-17 */
+    int FDC_feat_val_abs_max;              /** Feature absolute maximum boundry value (float64 read) addr: 0-17 */
+    int FDC_feat_val_abs_min;              /** Feature absolute minimum boundry value (float64 read) addr: 0-17 */
+    int FDC_feat_mode;                     /** Feature control mode: 0:manual or 1:automatic (camera controlled) (int32 read/write)*/
+    int FDC_feat_available;                /** Is a given featurea available in the camera 1=available 0=not available (int32, read) */
+    int FDC_feat_absolute;                 /** Feature has absolute (floating point) controls available 1=available 0=not available (int32 read) */
+    int FDC_format;                        /** Set and read back the video format (int32 (enums) read/write)*/
+    int FDC_mode;                          /** Set and read back the video mode (int32 (enums) read/write)*/
+    int FDC_framerate;                     /** Set and read back the frame rate (int32 (enums) read/write)*/
+    int FDC_colorcode;                     /** Set and read back the color code (int32 (enums) read/write)*/
+    int FDC_valid_format;                  /** Read back the valid video formats (octet, read)*/
+    int FDC_valid_mode;                    /** Read back the valid video modes (octet, read)*/
+    int FDC_valid_framerate;               /** Read back the valid frame rates (octet, read)*/
+    int FDC_valid_colorcode;               /** Read back the valid color codes (octet, read)*/
+    int FDC_has_format;                    /** Read back whether video format is supported (int32, read)*/
+    int FDC_has_mode;                      /** Read back whether video mode is supported (int32, read)*/
+    int FDC_has_framerate;                 /** Read back whether video framerate is supported (int32, read)*/
+    int FDC_has_colorcode;                 /** Read back whether color code is supported (int32, read)*/
+    int FDC_current_format;                /** Read back the current video format (octet, read)*/
+    int FDC_current_mode;                  /** Read back the current video mode (octet, read)*/
+    int FDC_current_framerate;             /** Read back the current frame rate (octet, read)*/
+    int FDC_current_colorcode;             /** Read back the current color mcde (octet, read)*/
+    #define LAST_FDC_PARAM FDC_current_colorcode
 
 private:
     /* Local methods to this class */
@@ -115,6 +171,9 @@ private:
     epicsEventId stopEventId;
 };
 /* end of FirewireWinDCAM class description */
+
+/** Number of asyn parameters (asyn commands) this driver supports. */
+#define NUM_FDC_PARAMS (&LAST_FDC_PARAM - &FIRST_FDC_PARAM + 1)
 
 /** Configuration function to configure one camera.
  *
@@ -234,68 +293,6 @@ static CAMERA_FEATURE featureIndex[] = {
 };
 static int num1394Features = sizeof(featureIndex) / sizeof(featureIndex[0]);
 
-/** Specific asyn commands for this support module. These will be used and
- * managed by the parameter library (part of areaDetector). */
-typedef enum FDCParam_t {
-    FDC_feat_val = ADLastStdParam,     /** Feature value (int32 read/write) addr: 0-17 */
-    FDC_feat_val_max,                  /** Feature maximum boundry value (int32 read) addr: 0-17 */
-    FDC_feat_val_min,                  /** Feature minimum boundry value (int32 read)  addr: 0-17*/
-    FDC_feat_val_abs,                  /** Feature absolute value (float64 read/write) addr: 0-17 */
-    FDC_feat_val_abs_max,              /** Feature absolute maximum boundry value (float64 read) addr: 0-17 */
-    FDC_feat_val_abs_min,              /** Feature absolute minimum boundry value (float64 read) addr: 0-17 */
-    FDC_feat_mode,                     /** Feature control mode: 0:manual or 1:automatic (camera controlled) (int32 read/write)*/
-    FDC_feat_available,                /** Is a given featurea available in the camera 1=available 0=not available (int32, read) */
-    FDC_feat_absolute,                 /** Feature has absolute (floating point) controls available 1=available 0=not available (int32 read) */
-    FDC_format,                        /** Set and read back the video format (int32 (enums) read/write)*/
-    FDC_mode,                          /** Set and read back the video mode (int32 (enums) read/write)*/
-    FDC_framerate,                     /** Set and read back the frame rate (int32 (enums) read/write)*/
-    FDC_colorcode,                     /** Set and read back the color code (int32 (enums) read/write)*/
-    FDC_valid_format,                  /** Read back the valid video formats (octet, read)*/
-    FDC_valid_mode,                    /** Read back the valid video modes (octet, read)*/
-    FDC_valid_framerate,               /** Read back the valid frame rates (octet, read)*/
-    FDC_valid_colorcode,               /** Read back the valid color codes (octet, read)*/
-    FDC_has_format,                    /** Read back whether video format is supported (int32, read)*/
-    FDC_has_mode,                      /** Read back whether video mode is supported (int32, read)*/
-    FDC_has_framerate,                 /** Read back whether video framerate is supported (int32, read)*/
-    FDC_has_colorcode,                 /** Read back whether color code is supported (int32, read)*/
-    FDC_current_format,                /** Read back the current video format (octet, read)*/
-    FDC_current_mode,                  /** Read back the current video mode (octet, read)*/
-    FDC_current_framerate,             /** Read back the current frame rate (octet, read)*/
-    FDC_current_colorcode,             /** Read back the current color mcde (octet, read)*/
-    ADLastDriverParam
-} FDCParam_t;
-
-static asynParamString_t FDCParamString[] = {
-    {FDC_feat_val,           "FDC_FEAT_VAL"},
-    {FDC_feat_val_max,       "FDC_FEAT_VAL_MAX"},
-    {FDC_feat_val_min,       "FDC_FEAT_VAL_MIN"},
-    {FDC_feat_val_abs,       "FDC_FEAT_VAL_ABS"},
-    {FDC_feat_val_abs_max,   "FDC_FEAT_VAL_ABS_MAX"},
-    {FDC_feat_val_abs_min,   "FDC_FEAT_VAL_ABS_MIN"},
-    {FDC_feat_mode,          "FDC_FEAT_MODE"},
-    {FDC_feat_available,     "FDC_FEAT_AVAILABLE"},
-    {FDC_feat_absolute,      "FDC_FEAT_ABSOLUTE"},
-    {FDC_format,             "FDC_FORMAT"},
-    {FDC_mode,               "FDC_MODE"},
-    {FDC_framerate,          "FDC_FRAMERATE"},
-    {FDC_colorcode,          "FDC_COLORCODE"},
-    {FDC_valid_format,       "FDC_VALID_FORMAT"},
-    {FDC_valid_mode,         "FDC_VALID_MODE"},
-    {FDC_valid_framerate,    "FDC_VALID_FRAMERATE"},
-    {FDC_valid_colorcode,    "FDC_VALID_COLORCODE"},
-    {FDC_has_format,         "FDC_HAS_FORMAT"},
-    {FDC_has_mode,           "FDC_HAS_MODE"},
-    {FDC_has_framerate,      "FDC_HAS_FRAMERATE"},
-    {FDC_has_colorcode,      "FDC_HAS_COLORCODE"},
-    {FDC_current_format,     "FDC_CURRENT_FORMAT"},
-    {FDC_current_mode,       "FDC_CURRENT_MODE"},
-    {FDC_current_framerate,  "FDC_CURRENT_FRAMERATE"},
-    {FDC_current_colorcode,  "FDC_CURRENT_COLORCODE"},
-};
-
-/** Number of asyn parameters (asyn commands) this driver supports. */
-#define FDC_N_PARAMS (sizeof( FDCParamString)/ sizeof(FDCParamString[0]))
-
 static void imageGrabTaskC(void *drvPvt)
 {
     FirewireWinDCAM *pPvt = (FirewireWinDCAM *)drvPvt;
@@ -322,7 +319,7 @@ static void imageGrabTaskC(void *drvPvt)
  */
 FirewireWinDCAM::FirewireWinDCAM(    const char *portName, const char* camid, 
                             int maxBuffers, size_t maxMemory, int priority, int stackSize )
-    : ADDriver(portName, num1394Features, ADLastDriverParam, maxBuffers, maxMemory, 0, 0,
+    : ADDriver(portName, num1394Features, NUM_FDC_PARAMS, maxBuffers, maxMemory, 0, 0,
                ASYN_CANBLOCK | ASYN_MULTIDEVICE, 1, priority, stackSize),
         pRaw(NULL)
 {
@@ -812,9 +809,7 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
     /* Set the value in the parameter library.  This may change later but that's OK */
     status = setIntegerParam(addr, function, value);
 
-    switch(function)
-    {
-    case ADAcquire:
+    if (function == ADAcquire) {
         getIntegerParam(ADStatus, &adstatus);
         if (value && (adstatus == ADStatusIdle))
         {
@@ -824,51 +819,39 @@ asynStatus FirewireWinDCAM::writeInt32( asynUser *pasynUser, epicsInt32 value)
         {
             status = this->stopCapture(pasynUser);
         }
-        break;
-
-    case ADSizeX:
-    case ADSizeY:
-    case ADMinX:
-    case ADMinY:
-    case FDC_colorcode:
+    } else if ( (function == ADSizeX) ||
+                (function == ADSizeY) ||
+                (function == ADMinX)  ||
+                (function == ADMinY)  ||
+                (function == FDC_colorcode)) {
         status = this->setFormat7Params(pasynUser);
-        break;
-    case FDC_feat_val:
+    } else if (function == FDC_feat_val) {
         /* First check if the camera is set for manual control... */
         getIntegerParam(addr, FDC_feat_mode, &tmpVal);
         /* if it is not set to 'manual' (0) then we do set it to manual */
         if (tmpVal != 0) status = this->setFeatureMode(pasynUser, 0);
-        if (status == asynError) break;
+        if (status == asynError) goto done;
 
         /* now send the feature value to the camera */
         status = this->setFeatureValue(pasynUser, value);
 
         /* update all feature values to check if any settings have changed */
         status = this->getAllFeatures();
-        break;
-
-    case FDC_feat_mode:
+    } else if (function == FDC_feat_mode) {
         status = this->setFeatureMode(pasynUser, value);
-        break;
-
-    case FDC_format:
+    } else if (function == FDC_format) {
         status = this->setVideoFormat(pasynUser, value);
-        break;
-
-    case FDC_mode:
+    } else if (function == FDC_mode) {
         status = this->setVideoMode(pasynUser, value);
-        break;
-
-    case FDC_framerate:
+    } else if (function == FDC_framerate) {
         status = this->setFrameRate(pasynUser, value);
-        break;
-
-    default:
+    } else {
         /* If this parameter belongs to a base class call its method */
-        if (function < ADLastStdParam) status = ADDriver::writeInt32(pasynUser, value);
-        break;
+        if (function < FIRST_FDC_PARAM) status = ADDriver::writeInt32(pasynUser, value);
     }
 
+    done:
+    
     /* Call the callback for the specific address .. and address ... weird? */
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, value=%d, status=%d\n",
             driverName, functionName, function, value, status);
@@ -896,9 +879,7 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
     /* Set the value in the parameter library.  This may change later but that's OK */
     status = setDoubleParam(addr, function, value);
 
-    switch(function)
-    {
-    case FDC_feat_val_abs:
+    if (function == FDC_feat_val_abs) {
         /* First check if the camera is set for manual control... */
         getIntegerParam(addr, FDC_feat_mode, &tmpVal);
         /* if it is not set to 'manual' (0) then we do set it to manual */
@@ -907,11 +888,9 @@ asynStatus FirewireWinDCAM::writeFloat64( asynUser *pasynUser, epicsFloat64 valu
         status = this->setFeatureAbsValue(pasynUser, value);
         /* update all feature values to check if any settings have changed */
         status = this->getAllFeatures();
-        break;
-    default:
+    } else {
         /* If this parameter belongs to a base class call its method */
-        if (function < ADLastStdParam) status = ADDriver::writeFloat64(pasynUser, value);
-        break;
+        if (function < FIRST_FDC_PARAM) status = ADDriver::writeFloat64(pasynUser, value);
     }
 
     asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, "%s::%s function=%d, value=%f, status=%d\n",
@@ -1657,39 +1636,6 @@ asynStatus FirewireWinDCAM::err( asynUser* asynUser, int CAM_err, int errOriginL
     else asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "### ERROR port=%s line=%d, error=%d (%s)\n", 
         this->portName, errOriginLine, CAM_err, errMsg[-CAM_err]);
     return asynError;
-}
-
-/** Create an asyn user for the driver.
- * Maps the integer/enum asyn commands on to a string representation that
- * can be used to indicate a certain command in in the INP/OUT field of a record.
- * \param pasynUser
- * \param drvInfo
- * \param pptypeName
- * \param psize
- * \return asynStatus Either asynError or asynSuccess
- */
-asynStatus FirewireWinDCAM::drvUserCreate( asynUser *pasynUser, const char *drvInfo, const char **pptypeName, size_t *psize)
-{
-    asynStatus status;
-    int param;
-    const char *functionName = "drvUserCreate";
-
-    /* See if this is one of the drivers local parameters */
-    status = findParam(FDCParamString, FDC_N_PARAMS, drvInfo, &param);
-
-    if (status == asynSuccess)
-    {
-        pasynUser->reason = param;
-        if (pptypeName) { *pptypeName = epicsStrDup(drvInfo); }
-        if (psize) { *psize = sizeof(param); }
-        asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s: drvInfo=%s, param=%d\n",
-                    driverName, functionName, drvInfo, param);
-        return asynSuccess;
-    }
-
-    /* If not a local driver parameter, then see if it is a base class parameter */
-    status = ADDriver::drvUserCreate(pasynUser, drvInfo, pptypeName, psize);
-    return status;
 }
 
 /** Print out a report; calls ADDriver::report to get base class report as well.
