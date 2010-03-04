@@ -22,8 +22,10 @@ dbLoadTemplate("firewire.substitutions")
 # Create a standard arrays plugin, set it to get 8-bit data from the driver.
 NDStdArraysConfigure("FW1Image", 5, 0, "FW1", 0, -1)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=13FW1:,R=image1:,PORT=FW1Image,ADDR=0,TIMEOUT=1,NDARRAY_PORT=FW1,NDARRAY_ADDR=0")
-# This is enough elements for 1376*1024*3
+# Use the following line for an 8-bit camera.  This is enough elements for 1376*1024*3, increase if needed.
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=13FW1:,R=image1:,PORT=FW1Image,ADDR=0,TIMEOUT=1,TYPE=Int8,FTVL=UCHAR,NELEMENTS=4227072")
+# Use the following line for an 12-bit or 16-bit camera.  This is enough elements for 1500x1000x1, increase if needed.
+#dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=13FW1:,R=image1:,PORT=FW1Image,ADDR=0,TIMEOUT=1,TYPE=Int16,FTVL=SHORT,NELEMENTS=1500000")
 
 # Create a second standard arrays plugin, set it to get 16-bit data from the driver.
 NDStdArraysConfigure("FW1Image2", 5, 0, "FW1", 0, -1)
