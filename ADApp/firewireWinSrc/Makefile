@@ -21,7 +21,9 @@ PROD_SRCS += firewireWinDCAMApp_registerRecordDeviceDriver.cpp firewireWinDCAMAp
 
 # Add locally compiled object code
 PROD_LIBS += firewireWinDCAM
-PROD_LIBS += NDPluginColorConvert NDPlugin ADBase netCDF
+PROD_LIBS += NDPlugin ADBase netCDF
+PROD_LIBS_Linux += PvAPI ImageLib
+PROD_LIBS_WIN32 += PvAPI ImageLib
 PROD_LIBS += PvAPI ImageLib
 PROD_LIBS += calc busy sscan autosave 
 PROD_LIBS += asyn
