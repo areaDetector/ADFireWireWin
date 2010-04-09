@@ -9,6 +9,8 @@ firewireWinDCAMApp_registerRecordDeviceDriver(pdbbase)
 epicsEnvSet("PREFIX", "13FW1:")
 epicsEnvSet("PORT",   "FW1")
 epicsEnvSet("QSIZE",  "20")
+epicsEnvSet("XSIZE",  "1376")
+epicsEnvSet("YSIZE",  "1024")
 
 # This is the Thorlabs camera
 #WinFDC_Config("$(PORT)", "116442682213159680", 50, 200000000)
