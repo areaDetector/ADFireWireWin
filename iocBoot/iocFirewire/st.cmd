@@ -11,6 +11,7 @@ epicsEnvSet("PORT",   "FW1")
 epicsEnvSet("QSIZE",  "20")
 epicsEnvSet("XSIZE",  "1376")
 epicsEnvSet("YSIZE",  "1024")
+epicsEnvSet("NCHANS", "2048")
 
 # This is the Thorlabs camera
 #WinFDC_Config("$(PORT)", "116442682213159680", 50, 200000000)
