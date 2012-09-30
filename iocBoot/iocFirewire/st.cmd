@@ -31,7 +31,7 @@ dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/firewireDCAM.template", "P=$(PREFIX),R=
 dbLoadTemplate("firewire.substitutions")
 
 # Create a standard arrays plugin, set it to get 8-bit data from the driver.
-NDStdArraysConfigure("Image1", 5, 0, "$(PORT)", 0, -1)
+NDStdArraysConfigure("Image1", 5, 0, "$(PORT)", 0, 0)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=$(PREFIX),R=image1:,PORT=Image1,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT),NDARRAY_ADDR=0")
 
 # Use the following line for an 8-bit camera.  This is enough elements for 1376*1024*3, increase if needed.
@@ -41,7 +41,7 @@ dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=$(PREFIX),R=i
 #dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDStdArrays.template", "P=$(PREFIX),R=image1:,PORT=Image1,ADDR=0,TIMEOUT=1,TYPE=Int16,FTVL=SHORT,NELEMENTS=1500000")
 
 # Create a second standard arrays plugin, set it to get 16-bit data from the driver.
-NDStdArraysConfigure("Image2", 5, 0, "$(PORT)", 0, -1)
+NDStdArraysConfigure("Image2", 5, 0, "$(PORT)", 0, 0)
 dbLoadRecords("$(AREA_DETECTOR)/ADApp/Db/NDPluginBase.template","P=$(PREFIX),R=image2:,PORT=Image2,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT),NDARRAY_ADDR=0")
 
 # This is enough elements for 1376*1024*3
