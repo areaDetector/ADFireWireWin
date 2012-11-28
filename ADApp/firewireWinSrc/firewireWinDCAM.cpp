@@ -174,7 +174,7 @@ private:
 /* end of FirewireWinDCAM class description */
 
 /** Number of asyn parameters (asyn commands) this driver supports. */
-#define NUM_FDC_PARAMS (&LAST_FDC_PARAM - &FIRST_FDC_PARAM + 1)
+#define NUM_FDC_PARAMS ((int)(&LAST_FDC_PARAM - &FIRST_FDC_PARAM + 1))
 
 /** Configuration function to configure one camera.
  *
@@ -586,7 +586,7 @@ int FirewireWinDCAM::grabImage()
 {
     int status = asynSuccess;
     NDDataType_t dataType;
-    int dims[3];
+    size_t dims[3];
     int err;
     unsigned long lsizeX, lsizeY;
     unsigned short sizeX, sizeY;
