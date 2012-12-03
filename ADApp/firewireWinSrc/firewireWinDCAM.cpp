@@ -482,19 +482,18 @@ void FirewireWinDCAM::imageGrabTask()
             setIntegerParam(ADStatus, ADStatusIdle);
             callParamCallbacks();
 
-            /* Release the lock while we wait for an event that says acquire has started, then lock again */
-            this->unlock();
-
             /* Wait for a signal that tells this thread that the transmission
              * has started and we can start asking for image buffers...     */
             asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
                 "%s::%s [%s]: waiting for acquire to start\n", 
                 driverName, functionName, this->portName);
+            /* Release the lock while we wait for an event that says acquire has started, then lock again */
+            this->unlock();
             status = epicsEventWait(this->startEventId);
+            this->lock();
             asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
                 "%s::%s [%s]: started!\n", 
                 driverName, functionName, this->portName);
-            this->lock();
             setIntegerParam(ADNumImagesCounter, 0);
             setIntegerParam(ADAcquire, 1);
         }
@@ -606,8 +605,8 @@ int FirewireWinDCAM::grabImage()
     /* unlock the driver while we wait for a new image to be ready */
     this->unlock();
     err = this->pCamera->AcquireImageEx(TRUE, &newDroppedFrames);
-    status = PERR(err);
     this->lock();
+    status = PERR(err);
     if (status) return status;   /* if we didn't get an image properly... */
 
     getIntegerParam(FDC_dropped_frames, &droppedFrames);
