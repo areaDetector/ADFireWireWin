@@ -10,13 +10,15 @@ LIBRARY_IOC += firewireWinDCAM
 # The following are compiled and added to the support library
 LIB_SRCS += firewireWinDCAM.cpp
 LIB_INSTALLS += ../1394camera.lib
-PROD_IOC += firewireWinDCAMApp
+PROD_NAME = firewireWinDCAMApp
+PROD_IOC += $(PROD_NAME)
 endif
 
-DBD += firewireWinDCAMSupport.dbd
 #==================================
 # <name>.dbd will be created from <name>Include.dbd
-DBD += firewireWinDCAMApp.dbd
+DBD += $(PROD_NAME).dbd
+$(PROD_NAME)_DBD += firewireWinDCAMSupport.dbd
+DBD += firewireWinDCAMSupport.dbd
 
 # <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
 PROD_SRCS += firewireWinDCAMApp_registerRecordDeviceDriver.cpp firewireWinDCAMAppMain.cpp
