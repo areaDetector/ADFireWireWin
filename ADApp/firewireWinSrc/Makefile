@@ -5,12 +5,13 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
+PROD_NAME = firewireWinDCAMApp
+
 ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
 LIBRARY_IOC += firewireWinDCAM
 # The following are compiled and added to the support library
 LIB_SRCS += firewireWinDCAM.cpp
 LIB_INSTALLS += ../1394camera.lib
-PROD_NAME = firewireWinDCAMApp
 PROD_IOC += $(PROD_NAME)
 endif
 
