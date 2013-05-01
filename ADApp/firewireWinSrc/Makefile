@@ -3,9 +3,8 @@ include $(TOP)/configure/CONFIG
 
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
-#=============================
 
-PROD_NAME = firewireWinDCAMApp
+#======== DETECTOR LIBRARY ==============
 
 ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
 LIBRARY_IOC += firewireWinDCAM
@@ -15,14 +14,22 @@ LIB_INSTALLS += ../1394camera.lib
 PROD_IOC += $(PROD_NAME)
 endif
 
-#==================================
+DBD += firewireWinDCAMSupport.dbd
+
+#====== DETECTOR APPLICATION ============
+
+ifeq ($(BUILD_APPS), YES)
+PROD_NAME = firewireWinDCAMApp
+ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
+PROD_IOC += $(PROD_NAME)
+endif
+
 # <name>.dbd will be created from <name>Include.dbd
 DBD += $(PROD_NAME).dbd
 $(PROD_NAME)_DBD += firewireWinDCAMSupport.dbd
-DBD += firewireWinDCAMSupport.dbd
 
 # <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
-PROD_SRCS += firewireWinDCAMApp_registerRecordDeviceDriver.cpp firewireWinDCAMAppMain.cpp
+PROD_SRCS += $(PROD_NAME)_registerRecordDeviceDriver.cpp $(PROD_NAME)Main.cpp
 
 # Add locally compiled object code
 PROD_LIBS += firewireWinDCAM
@@ -37,6 +44,7 @@ PROD_SYS_LIBS      += nafxcw
 endif
 ifeq ($(T_A), win32-x86-debug)
 PROD_SYS_LIBS      += nafxcwd
+endif
 endif
 
 #=============================
