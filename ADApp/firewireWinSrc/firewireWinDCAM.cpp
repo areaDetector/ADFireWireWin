@@ -42,7 +42,6 @@
 #include <epicsEvent.h>
 #include <epicsEndian.h>
 #include <iocsh.h>
-#include <epicsExport.h>
 
 /* Dependency support modules includes:
  * asyn, areaDetector, CMU 1394 camera library */
@@ -52,6 +51,8 @@
 
 /* 1394Camera includes */
 #include <1394Camera.h>
+
+#include <epicsExport.h>
 
 /** Convenience macro to be used inside the firewireDCAM class. */
 #define PERR(errCode) this->err(errCode, __LINE__)
