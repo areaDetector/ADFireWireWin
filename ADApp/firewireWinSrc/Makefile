@@ -10,8 +10,19 @@ ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
 LIBRARY_IOC += firewireWinDCAM
 # The following are compiled and added to the support library
 LIB_SRCS += firewireWinDCAM.cpp
-LIB_INSTALLS += ../1394camera.lib
-PROD_IOC += $(PROD_NAME)
+LIB_INSTALLS += ../os/win32-x86/1394camera.lib
+endif
+ifeq (windows-x64, $(findstring windows-x64, $(T_A)))
+LIBRARY_IOC += firewireWinDCAM
+# The following are compiled and added to the support library
+LIB_SRCS += firewireWinDCAM.cpp
+LIB_INSTALLS += ../os/windows-x64/1394camera.lib
+endif
+
+LIB_LIBS += 1394camera
+
+ifeq ($(STATIC_BUILD), NO)
+USR_CXXFLAGS += -D_AFXDLL
 endif
 
 DBD += firewireWinDCAMSupport.dbd
@@ -21,6 +32,9 @@ DBD += firewireWinDCAMSupport.dbd
 ifeq ($(BUILD_APPS), YES)
 PROD_NAME = firewireWinDCAMApp
 ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
+PROD_IOC += $(PROD_NAME)
+endif
+ifeq (windows-x64, $(findstring windows-x64, $(T_A)))
 PROD_IOC += $(PROD_NAME)
 endif
 
@@ -39,12 +53,12 @@ include $(TOP)/ADApp/commonDriverMakefile
 
 # If we don't include nafxcw in the link command then VS links the C runtime before
 # MFC and we get errors that operator new and delete are multiply defined.
-ifeq ($(T_A), win32-x86)
+ifeq (debug, findstring(debug, $(T_A)))
+PROD_SYS_LIBS      += nafxcwd
+else
 PROD_SYS_LIBS      += nafxcw
 endif
-ifeq ($(T_A), win32-x86-debug)
-PROD_SYS_LIBS      += nafxcwd
-endif
+
 endif
 
 #=============================
