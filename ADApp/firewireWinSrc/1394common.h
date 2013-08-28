@@ -16,7 +16,7 @@
  *  Pittsburgh, PA
  *
  *	Copyright 5/2000
- * 
+ *
  *	Iwan Ulrich
  *	Robotics Institute
  *	Carnegie Mellon University
@@ -24,12 +24,12 @@
  *
  *  This file is part of the CMU 1394 Digital Camera Driver
  *
- *  The CMU 1394 Digital Camera Driver is free software; you can redistribute 
- *  it and/or modify it under the terms of the GNU Lesser General Public License 
+ *  The CMU 1394 Digital Camera Driver is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of the License,
  *  or (at your option) any later version.
  *
- *  The CMU 1394 Digital Camera Driver is distributed in the hope that it will 
+ *  The CMU 1394 Digital Camera Driver is distributed in the hope that it will
  *  be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
@@ -55,10 +55,10 @@ DEFINE_GUID(GUID_1394CMDR, 0xf390415a, 0x2eaf, 0x4fd4, 0xac, 0xcc, 0x3d, 0x17, 0
 //
 #define CMDR_MAJORVERSION 6
 #define CMDR_MINORVERSION 4
-#define CMDR_REVISION     5
-#define CMDR_BUILD        132
+#define CMDR_REVISION     6
+#define CMDR_BUILD        240
 
-#define CMDR_VERSIONSTRING "6.04.05.0132"
+#define CMDR_VERSIONSTRING "6.04.06.0240"
 
 //
 // these guys are meant to be called from a ring 3 app
@@ -126,12 +126,12 @@ DEFINE_GUID(GUID_1394CMDR, 0xf390415a, 0x2eaf, 0x4fd4, 0xac, 0xcc, 0x3d, 0x17, 0
                                                         CMDR1394_IOCTL_INDEX + 21,      \
                                                         METHOD_BUFFERED,                \
                                                         FILE_ANY_ACCESS)
-*/
+
 #define IOCTL_GET_MAX_SPEED_BETWEEN_DEVICES             CTL_CODE( FILE_DEVICE_UNKNOWN,  \
                                                         CMDR1394_IOCTL_INDEX + 22,      \
                                                         METHOD_BUFFERED,                \
                                                         FILE_ANY_ACCESS)
-/*
+
 #define IOCTL_SET_DEVICE_XMIT_PROPERTIES                CTL_CODE( FILE_DEVICE_UNKNOWN,  \
                                                         CMDR1394_IOCTL_INDEX + 23,      \
                                                         METHOD_BUFFERED,                \
@@ -186,7 +186,7 @@ DEFINE_GUID(GUID_1394CMDR, 0xf390415a, 0x2eaf, 0x4fd4, 0xac, 0xcc, 0x3d, 0x17, 0
                                                         CMDR1394_IOCTL_INDEX + 50,      \
                                                         METHOD_BUFFERED,                \
                                                         FILE_ANY_ACCESS)
-                                                        
+
 #define IOCTL_GET_CMDR_VERSION                          CTL_CODE( FILE_DEVICE_UNKNOWN,  \
                                                         CMDR1394_IOCTL_INDEX + 51,      \
                                                         METHOD_BUFFERED,                \
@@ -257,8 +257,10 @@ DEFINE_GUID(GUID_1394CMDR, 0xf390415a, 0x2eaf, 0x4fd4, 0xac, 0xcc, 0x3d, 0x17, 0
                                                         METHOD_BUFFERED,                \
                                                         FILE_ANY_ACCESS)
 
-
-
+#define IOCTL_GET_MAX_ISOCH_SPEED						CTL_CODE( FILE_DEVICE_UNKNOWN,  \
+                                                        CMDR1394_IOCTL_INDEX + 82,      \
+                                                        METHOD_BUFFERED,                \
+                                                        FILE_ANY_ACCESS)
 //
 // struct used with IOCTL_ISOCH_SETUP_STREAM
 //
@@ -280,6 +282,12 @@ typedef struct _ISOCH_STREAM_PARAMS {
   ULONG nMaxBufferSize;
 } ISOCH_STREAM_PARAMS, *PISOCH_STREAM_PARAMS;
 
+#define ISOCH_BUFFER_PRIMARY 0x00
+#define ISOCH_BUFFER_SECONDARY 0x01
+
+typedef struct _ISOCH_BUFFER_PARAMS {
+    ULONG ulFlags;
+} ISOCH_BUFFER_PARAMS, *PISOCH_BUFFER_PARAMS;
 /*
 //
 // struct used to pass in with IOCTL_ASYNC_READ
@@ -332,12 +340,14 @@ typedef struct _GET_LOCAL_HOST_INFORMATION {
 //
 // struct used to pass in with IOCTL_GET_MAX_SPEED_BETWEEN_DEVICES
 //
+/* cbaker: deprecated at 6.4.6 in favor of IOCTL_GET_MAX_ISOCH_SPEED
 typedef struct _GET_MAX_SPEED_BETWEEN_DEVICES {
     ULONG           fulFlags;
     ULONG           ulNumberOfDestinations;
     HANDLE          hDestinationDeviceObjects[64];
     ULONG           fulSpeed;
 } GET_MAX_SPEED_BETWEEN_DEVICES, *PGET_MAX_SPEED_BETWEEN_DEVICES;
+*/
 
 //
 // struct used to pass in with IOCTL_GET_DIAG_VERSION
@@ -356,7 +366,7 @@ typedef struct _REGISTER_IOBUF
 {
 	ULONG		ulOffset;
 	UCHAR		data[4];
-} REGISTER_IOBUF, *PREGISTER_IOBUF;	
+} REGISTER_IOBUF, *PREGISTER_IOBUF;
 
 //
 // struct used to get camera specification information

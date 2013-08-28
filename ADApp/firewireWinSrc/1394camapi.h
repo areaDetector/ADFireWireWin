@@ -161,6 +161,7 @@ ULONG CAMAPI dc1394GetFeatureOffset(CAMERA_FEATURE id);
 LPCSTR CAMAPI dc1394GetFeatureName(CAMERA_FEATURE id);
 LPCSTR CAMAPI dc1394GetFeatureUnits(CAMERA_FEATURE id);
 CAMERA_FEATURE CAMAPI dc1394GetFeatureId(const char *name);
+BOOL CAMAPI dc1394TriggerModeHasParameter(ULONG nModeId, unsigned short *minValue, unsigned short *maxValue);
 
 /**\brief various possible color codes for raw frame data */
 typedef enum {
@@ -251,6 +252,7 @@ t1394IsochAttachBuffer(
     HANDLE hDevice,
     LPVOID pBuffer,
     ULONG  ulBufferLength,
+    PISOCH_BUFFER_PARAMS pParams,
     LPOVERLAPPED pOverLapped
     );
 
@@ -279,6 +281,49 @@ t1394IsochQueryResources(
     PSTR                        szDeviceName,
     PISOCH_QUERY_RESOURCES      isochQueryResources
     );
+
+/* Extensions to isochapi.c, particularly in support of 64-bit DMA issues */
+
+/**\brief Maximum number of sub-buffers associated with a given framebuffer */
+#define MAX_SUB_BUFFERS 64
+
+/**\brief Keep everything about a frame buffer in one place
+ * \ingroup capi
+ *
+ * Associates all the necessary	information	for	an image acquisition buffer
+ * This	includes the overlapped	structures used with	DeviceIoControl, pointers
+ * to the buffer and other bookeeping issues such as the concept of "sub-buffers"
+ * necessary to transfer large frame buffers on 64-bit platforms
+ */
+typedef	struct _ACQUISITION_BUFFER {
+	ULONG							ulBufferSize; ///< the size of the overall buffer
+	PUCHAR							pDataBuf;     ///< pointer to the actual underlying buffer
+	PUCHAR							pFrameStart;  ///< page-aligned pointer within pDataBuf to start the frame
+	ULONG                           index;        ///< user-defined index for this buffer
+    ULONG                           nSubBuffers;  ///< the number of sub-buffers that comprise this frame buffer
+    BOOL                            bNativelyContiguous; ///< Whether the sub-buffers are natively contiguous (false = requires "flattening" after DMA is complete)
+    BOOL                            bCurrentlyContiguous; ///< Whether the buffer has been "flattened" (only relevant for !bNativelyContiguous, reset on attach)
+    struct _subBuffer {
+        OVERLAPPED                  overLapped;   ///< the overlapped I/O structure associated with this sub-buffer
+        PUCHAR                      pData;        ///< the page-aligned starting point for this buffer
+        ULONG                       ulSize;       ///< the size of this sub-buffer
+    } subBuffers[MAX_SUB_BUFFERS];
+	struct _ACQUISITION_BUFFER		*pNextBuffer; ///< support linked lists of buffers
+} ACQUISITION_BUFFER, *PACQUISITION_BUFFER;
+
+PACQUISITION_BUFFER
+CAMAPI
+dc1394BuildAcquisitonBuffer(ULONG frameBufferSize, ULONG maxDMABufferSize, ULONG targetBytesPerPacket, ULONG index);
+
+void
+CAMAPI
+dc1394FreeAcquisitionBuffer(PACQUISITION_BUFFER pAcqBufer);
+
+DWORD
+CAMAPI
+dc1394AttachAcquisitionBuffer(HANDLE hDevice, PACQUISITION_BUFFER pAcqBuffer);
+
+void CAMAPI dc1394FlattenAcquisitionBuffer(PACQUISITION_BUFFER pAcqBuffer);
 
 // 1394main.c
 DWORD
@@ -396,20 +441,36 @@ GetCmdrVersion(
     );
 
 // getmaxspeed was moved from 1394camapi.c into 1394main.c because it was the only function we use from that file
-
+/* cbaker: deprecated at 6.4.6 in favor of GetMaxIsochSpeed()
 ULONG
 CAMAPI
 GetMaxSpeedBetweenDevices(
     PSTR                            szDeviceName,
     PGET_MAX_SPEED_BETWEEN_DEVICES  GetMaxSpeedBetweenDevices
     );
+    */
+
+ULONG
+CAMAPI
+GetMaxIsochSpeed(
+    PSTR szDeviceName,
+    PULONG fulSpeed
+    );
+
+DWORD
+CAMAPI
+t1394_GetHostDmaCapabilities(
+	LPCSTR szDeviceName,
+	PULONG pulCapabilitiesMask,
+	PULARGE_INTEGER puliMaxBufferSize
+	);
 
 // Opendevice moved out of util.c for similar reasons
 
 HANDLE
 CAMAPI
 OpenDevice(
-    PSTR    szDeviceName,
+    LPCSTR    szDeviceName,
     BOOL    bOverLapped
     );
 
@@ -423,6 +484,10 @@ void
 CAMAPI
 SetDllTraceLevel(int nlevel);
 
+// 1394main.c
+HKEY
+CAMAPI
+OpenCameraSettingsKey(LPCSTR subkey, DWORD dwOptions, REGSAM samDesired);
 
 // cap off the extern "C"
 

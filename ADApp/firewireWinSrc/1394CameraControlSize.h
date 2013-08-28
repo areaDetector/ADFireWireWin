@@ -86,7 +86,7 @@ public:
 	bool CheckError2();
 	
 private:
-	friend C1394Camera; // the less ugly of the two to allow SetOffset
+	friend class C1394Camera; // the less ugly of the two to allow SetOffset
 	int SetOffset(unsigned long offset);
 	int UpdateStatic();
 	int UpdateTier1(BOOL SetValues = FALSE);

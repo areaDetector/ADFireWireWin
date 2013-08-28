@@ -118,22 +118,6 @@
  */
 #define	CAM_ERROR_FRAME_TIMEOUT	-16
 
-/**\brief Keep everything about a frame buffer in one place
- * \ingroup camacq
- *
- * Associates all the necessary	information	for	an image acquisition buffer
- * This	includes the overlapped	structure used with	DeviceIoControl, pointers
- * to the buffer and other bookeeping stuff
- */
-typedef	struct _ACQUISITION_BUFFER {
-	OVERLAPPED						overLapped;
-	ULONG							ulBufferSize;
-	PUCHAR							pDataBuf;
-	PUCHAR							pFrameStart;
-	int								index;
-	struct _ACQUISITION_BUFFER		*pNextBuffer;
-} ACQUISITION_BUFFER, *PACQUISITION_BUFFER;
-
 /**\brief Whether StartImageAcquisitionEx()	should automatically start the camera stream 
  * \ingroup	acqflags
  */
@@ -173,8 +157,10 @@ public:
 	// Selection/Control
 	int	RefreshCameraList();
 	int	InitCamera(BOOL	reset=FALSE);
+	bool IsInitialized();
 	int	GetNode();
 	int	GetNodeDescription(int node, char *buf,	int	buflen);
+    const char *GetDevicePath();
 	int	SelectCamera(int node);
 	unsigned long GetVersion();
 	int	GetNumberCameras();
@@ -182,6 +168,7 @@ public:
 	void GetCameraVendor(char *buf,	int	len);
 	void GetCameraUniqueID(PLARGE_INTEGER pUniqueID);
 	int	 GetMaxSpeed();
+	void GetMaxBufferSize(PULARGE_INTEGER puliBufferSize);
 	int	 CheckLink();
 	bool HasPowerControl();
 	bool StatusPowerControl();
@@ -234,6 +221,7 @@ public:
 	int	AcquireImage();
 	int	AcquireImageEx(BOOL	DropStaleFrames, int *lpnDroppedFrames);
 	int	StopImageAcquisition();
+	bool IsAcquiring();
 	unsigned char *GetRawData(unsigned long	*pLength);
 	HANDLE GetFrameEvent();
 	
@@ -271,8 +259,8 @@ public:
 	C1394CameraControlTrigger *GetCameraControlTrigger();
 	C1394CameraControlSize *GetCameraControlSize();
 
-  // Optional Functions
-  bool HasOptionalFeatures();
+	// Optional Functions
+	bool HasOptionalFeatures();
 	
 	// PIO Interface
 	bool HasPIO();
@@ -281,6 +269,7 @@ public:
 	int GetPIOOutputBits(unsigned long *ulBits);
 	int SetPIOOutputBits(unsigned long ulBits);
 	int GetSIOStatusByte(unsigned char *byte);
+	int GetSIOConfig(unsigned long *ulBits);
 
 	// SIO Interface
 	bool HasSIO();
@@ -302,6 +291,11 @@ private:
 	// Utility Private Functions
 	BOOL InitResources();
 	BOOL FreeResources();
+	unsigned long ComputeBufferParameters(const unsigned long frameBufferSize,
+										 const unsigned long bytesPerIsochPacket,
+										 const unsigned long maxDMABufferSize,
+										 unsigned long &leadingBufferSize,
+										 unsigned long &trailingBufferSize);
 	BOOL InquireVideoFormats();
 	BOOL InquireVideoModes();
 	BOOL InquireVideoRates();
@@ -395,6 +389,9 @@ long
 CAMAPI
 CameraControlSizeDialog(HWND hWndParent, 
 						C1394Camera	*pCamera);
+
+LPCSTR CAMAPI CameraErrorString(int camerror);
+
 extern "C" {
 void
 CAMAPI
