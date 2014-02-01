@@ -26,7 +26,7 @@ endif
 
 DBD += firewireWinDCAMSupport.dbd
 
-include $(ADCORE)/ADApp/commonDriverMakefile
+include $(ADCORE)/ADApp/commonLibraryMakefile
 
 include $(TOP)/configure/RULES
 #----------------------------------------
