@@ -59,4 +59,4 @@ iocInit()
 #asynSetTraceMask("$(PORT)",0,1)
 
 # save things every thirty seconds
-create_monitor_set("auto_settings.req", 30,"P=$(PREFIX),D=cam1:")
+create_monitor_set("auto_settings.req", 30,"P=$(PREFIX)")
