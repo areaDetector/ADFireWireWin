@@ -1,7 +1,7 @@
 ADFireWireWin Releases
 ======================
 
-The latest unreleased master branch can be obtained at
+The latest untagged master branch can be obtained at
 https://github.com/areaDetector/ADFireWireWin.
 
 Tagged source code and pre-built binary releases prior to R2-0 are included
@@ -14,7 +14,7 @@ https://github.com/areaDetector/ADFireWireWin/releases.
 Tagged prebuilt binaries from R2-0 onward can be obtained at
 http://cars.uchicago.edu/software/pub/ADFireWireWin.
 
-The version of EPICS base, asyn, and other synApps modules used for each release can be obtained from 
+The versions of EPICS base, asyn, and other synApps modules used for each release can be obtained from 
 the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE_PRODS.local
 files respectively, in the appropriate release of the 
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
