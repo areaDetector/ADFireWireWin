@@ -14,24 +14,10 @@ https://github.com/areaDetector/ADFireWireWin/releases.
 Tagged prebuilt binaries from R2-0 onward can be obtained at
 http://cars.uchicago.edu/software/pub/ADFireWireWin.
 
-The version of EPICS base used for each release can be obtained from contents of the
-[EXAMPLE_RELEASE_PATHS.local](http://github.com/areaDetector/areaDetector/EXAMPLE_RELEASE_PATHS.local)
-file for the corresponding release of the 
-[top-level areaDetector directory](https://github.com/areaDetector/areaDetector).
-
-The version of 
-[asyn](http://www.aps.anl.gov/epics/modules/soft/asyn)
-used for each release can be obtained from contents of the
-[EXAMPLE_RELEASE_LIBS.local](http://github.com/areaDetector/areaDetector/EXAMPLE_RELEASE_LIBS.local)
-file for the corresponding release of the 
-[top-level areaDetector directory](https://github.com/areaDetector/areaDetector).
-
-The version of 
-[other SynApps modules](http://www.aps.anl.gov/bcda/synApps) 
-used for each release can be obtained from contents of the
-[EXAMPLE_RELEASE_LIBS.local](http://github.com/areaDetector/areaDetector/EXAMPLE_RELEASE_LIBS.local)
-file for the corresponding release of the 
-[top-level areaDetector directory](https://github.com/areaDetector/areaDetector).
+The version of EPICS base, asyn, and other synApps modules used for each release can be obtained from 
+the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE_PRODS.local
+files respectively, in the appropriate release of the 
+[top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
 
 
 Release Notes
