@@ -4,6 +4,8 @@
 ## can be controlled and read out: 
 ##
 
+include "ADBase.template"
+
 ## Video Format
 record(mbbo, "$(P)$(R)FORMAT") {
   field(SCAN, "Passive")

@@ -2,3 +2,4 @@ $(P)$(R)FORMAT
 $(P)$(R)MODE
 $(P)$(R)FR
 $(P)$(R)READOUT_TIME
+file "ADBase_settings.req", P=$(P), R=$(R)
