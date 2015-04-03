@@ -14,6 +14,7 @@
         <string>
 
 QWidget#centralWidget {background: rgba(187, 187, 187, 255);}
+QPushButton::menu-indicator {image: url(none.png); width: 0}
 
 caTable {
        font: 10pt;
@@ -2826,6 +2827,9 @@ border-radius: 2px;
                     <blue>255</blue>
                 </color>
             </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
+            </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
             </property>
@@ -2873,6 +2877,9 @@ border-radius: 2px;
                     <green>223</green>
                     <blue>255</blue>
                 </color>
+            </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
             </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
@@ -2922,6 +2929,9 @@ border-radius: 2px;
                     <blue>255</blue>
                 </color>
             </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
+            </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
             </property>
@@ -2969,6 +2979,9 @@ border-radius: 2px;
                     <green>223</green>
                     <blue>255</blue>
                 </color>
+            </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
             </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
@@ -3018,6 +3031,9 @@ border-radius: 2px;
                     <blue>255</blue>
                 </color>
             </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
+            </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
             </property>
@@ -3065,6 +3081,9 @@ border-radius: 2px;
                     <green>223</green>
                     <blue>255</blue>
                 </color>
+            </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
             </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
@@ -3880,6 +3899,9 @@ border-radius: 2px;
                     <blue>255</blue>
                 </color>
             </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
+            </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
             </property>
@@ -3927,6 +3949,9 @@ border-radius: 2px;
                     <green>223</green>
                     <blue>255</blue>
                 </color>
+            </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
             </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
@@ -17125,6 +17150,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17172,6 +17200,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17221,6 +17252,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17268,6 +17302,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17317,6 +17354,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17364,6 +17404,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17413,6 +17456,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17460,6 +17506,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17509,6 +17558,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17556,6 +17608,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17605,6 +17660,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17652,6 +17710,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17701,6 +17762,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17748,6 +17812,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17797,6 +17864,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17844,6 +17914,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17893,6 +17966,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -17940,6 +18016,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -17989,6 +18068,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18036,6 +18118,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18085,6 +18170,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18132,6 +18220,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18181,6 +18272,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18228,6 +18322,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18277,6 +18374,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18324,6 +18424,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18373,6 +18476,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18420,6 +18526,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18469,6 +18578,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18516,6 +18628,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18565,6 +18680,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18612,6 +18730,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18661,6 +18782,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18708,6 +18832,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -18757,6 +18884,9 @@ border-radius: 2px;
                         <blue>255</blue>
                     </color>
                 </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
+                </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
                 </property>
@@ -18804,6 +18934,9 @@ border-radius: 2px;
                         <green>223</green>
                         <blue>255</blue>
                     </color>
+                </property>
+                <property name="incrementValue">
+                    <double>1.000000</double>
                 </property>
                 <property name="limitsMode">
                     <enum>caSlider::Channel</enum>
@@ -19584,6 +19717,9 @@ border-radius: 2px;
                     <blue>255</blue>
                 </color>
             </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
+            </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
             </property>
@@ -19631,6 +19767,9 @@ border-radius: 2px;
                     <green>223</green>
                     <blue>255</blue>
                 </color>
+            </property>
+            <property name="incrementValue">
+                <double>1.000000</double>
             </property>
             <property name="limitsMode">
                 <enum>caSlider::Channel</enum>
