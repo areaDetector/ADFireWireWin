@@ -54,7 +54,7 @@ NDStdArraysConfigure("Image2", 5, 0, "$(PORT)", 0, 0)
 dbLoadRecords("$(ADCORE)/db/NDStdArrays.template", "P=$(PREFIX),R=image2:,PORT=Image2,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT),TYPE=Int16,FTVL=SHORT,NELEMENTS=4227072")
 
 # Load all other plugins using commonPlugins.cmd
-< $(ADEXAMPLE)/iocBoot/commonPlugins.cmd
+< $(ADCORE)/iocBoot//commonPlugins.cmd
 set_requestfile_path("$(ADFIREWIREWIN)/firewireWinApp/Db")
 
 #asynSetTraceMask("$(PORT)",0,255)

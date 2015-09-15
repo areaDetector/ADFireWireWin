@@ -22,7 +22,7 @@ PROD_SRCS += $(PROD_NAME)_registerRecordDeviceDriver.cpp $(PROD_NAME)Main.cpp
 PROD_LIBS += firewireWinDCAM
 PROD_LIBS += 1394camera
 
-include $(ADEXAMPLE)/exampleApp/commonDriverMakefile
+include $(ADCORE)/ADApp/commonDriverMakefile
 
 # If we don't include nafxcw in the link command then VS links the C runtime before
 # MFC and we get errors that operator new and delete are multiply defined.
