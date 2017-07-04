@@ -23,6 +23,12 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
+R2-2 (04-July-2017)
+----
+* Fixed medm screen layout for ADCore R3-0.
+* Fixed configure/RELEASE for IOC.
+
+
 R2-1 (16-April-2015)
 ----
 * Changes for compatibility with ADCore R2-2
