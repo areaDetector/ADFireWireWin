@@ -544,11 +544,7 @@ void FirewireWinDCAM::imageGrabTask()
         if (arrayCallbacks)
         {
             /* Call the NDArray callback */
-            /* Must release the lock here, or we can get into a deadlock, because we can
-             * block on the plugin lock, and the plugin can be calling us */
-            this->unlock();
             doCallbacksGenericPointer(this->pRaw, NDArrayData, 0);
-            this->lock();
         }
         /* Release the NDArray buffer now that we are done with it.
          * After the callback just above we don't need it anymore */
