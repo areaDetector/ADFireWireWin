@@ -464,7 +464,6 @@ void FirewireWinDCAM::imageGrabTask()
     int numImages, numImagesCounter;
     int imageMode;
     int arrayCallbacks;
-    epicsTimeStamp startTime;
     int acquire;
     const char *functionName = "imageGrabTask";
 
@@ -499,8 +498,6 @@ void FirewireWinDCAM::imageGrabTask()
             setIntegerParam(ADAcquire, 1);
         }
 
-        /* Get the current time */
-        epicsTimeGetCurrent(&startTime);
         /* We are now waiting for an image  */
         setIntegerParam(ADStatus, ADStatusWaiting);
         /* Call the callbacks to update any changes */
@@ -532,8 +529,8 @@ void FirewireWinDCAM::imageGrabTask()
         /* Put the frame number into the buffer */
         this->pRaw->uniqueId = imageCounter;
         /* Set a timestamp in the buffer */
-        this->pRaw->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
         updateTimeStamp(&this->pRaw->epicsTS);
+        this->pRaw->timeStamp = this->pRaw->epicsTS.secPastEpoch + this->pRaw->epicsTS.nsec / 1.e9;
 
         /* Get any attributes that have been defined for this driver */        
         this->getAttributes(this->pRaw->pAttributeList);
