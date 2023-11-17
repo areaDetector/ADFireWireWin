@@ -529,7 +529,7 @@ void FirewireWinDCAM::imageGrabTask()
         /* Put the frame number into the buffer */
         this->pRaw->uniqueId = imageCounter;
         /* Set a timestamp in the buffer */
-        updateTimeStamp(this->pRaw);
+        updateTimeStamps(this->pRaw);
 
         /* Get any attributes that have been defined for this driver */        
         this->getAttributes(this->pRaw->pAttributeList);
