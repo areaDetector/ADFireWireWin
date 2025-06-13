@@ -9,6 +9,8 @@ specification. This driver runs only on Windows using the
 [Carnegie Mellon 1394](http://www.cs.cmu.edu/~iwan/1394/)
 camera driver and library.
 
+**This repository is no longer active and was archived on June 13, 2025.**
+
 Additional information:
 * [Documentation](https://cars.uchicago.edu/software/epics/FirewireWinDoc.html).
 * [Release notes and links to source and binary releases](RELEASE.md).
